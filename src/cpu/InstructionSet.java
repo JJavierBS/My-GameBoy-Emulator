@@ -13,7 +13,8 @@ public class InstructionSet {
 	public InstructionSet() {
 		instructions = new HashMap<>();
 		instructionsCB = new HashMap<>();
-		//Block 0
+		
+		
 		instructions.put((byte)0x00, cpu -> {
 			//nop
 			return 4;
@@ -75,6 +76,20 @@ public class InstructionSet {
 			mmu.writeByte(addr, value & 0xFF);
 			mmu.writeByte(addr+1, (value>>8) & 0xFF);
 			return 20;
+		});
+		
+		instructions.put((byte)0x09, cpu -> {
+			//ADD HL, BC
+			int hl = cpu.getHL();
+			int value = cpu.getBC();
+			int result = hl + value;
+			
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((hl & 0x0FFF) + (value & 0x0FFF)) > 0x0FFF);
+			cpu.updateCarryFlag((hl + value) > 0xFFFF);
+			
+			cpu.setHL(result&0xFFFF);
+			return 8;
 		});
 		
 		instructions.put((byte)0x0A, cpu -> {
@@ -166,6 +181,27 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0x18, cpu -> {
+			//JR r8
+			int despl = cpu.fetchByte();
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
+		instructions.put((byte)0x19, cpu -> {
+			//ADD HL, DE
+			int hl = cpu.getHL();
+			int value = cpu.getDE();
+			int result = hl + value;
+			
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((hl & 0x0FFF) + (value & 0x0FFF)) > 0x0FFF);
+			cpu.updateCarryFlag((hl + value) > 0xFFFF);
+			
+			cpu.setHL(result&0xFFFF);
+			return 8;
+		});
+		
 		instructions.put((byte)0x1A, cpu -> {
 			//LD A, (DE)
 			cpu.setA(cpu.getMmu().readByte(cpu.getDE()));
@@ -208,10 +244,26 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0x20, cpu -> {
+			//JR NZ,r8
+			int despl = cpu.fetchByte();
+			if(cpu.isZeroFlag()) return 8;
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
 		instructions.put((byte)0x21, cpu -> {
 			//LD HL,d16
 			cpu.setHL(cpu.fetchWord());
 			return 12;
+		});
+		
+		instructions.put((byte)0x22, cpu -> {
+			//LD (HL+),A
+			int hl = cpu.getHL();
+			cpu.getMmu().writeByte(hl, cpu.getA());
+			cpu.setHL(hl++);
+			return 8;
 		});
 		
 		instructions.put((byte)0x23, cpu -> {
@@ -246,6 +298,36 @@ public class InstructionSet {
 		instructions.put((byte)0x26, cpu -> {
 			//LD H, d8
 			cpu.setH(cpu.fetchByte());
+			return 8;
+		});
+		
+		instructions.put((byte)0x28, cpu -> {
+			//JR Z,r8
+			int despl = cpu.fetchByte();
+			if(!cpu.isZeroFlag()) return 8;
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
+		instructions.put((byte)0x29, cpu -> {
+			//ADD HL, HL
+			int hl = cpu.getHL();
+			int value = cpu.getHL();
+			int result = hl + value;
+			
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((hl & 0x0FFF) + (value & 0x0FFF)) > 0x0FFF);
+			cpu.updateCarryFlag((hl + value) > 0xFFFF);
+			
+			cpu.setHL(result&0xFFFF);
+			return 8;
+		});
+		
+		instructions.put((byte)0x2A, cpu -> {
+			//LD A,(HL+)
+			int hl = cpu.getHL();
+			cpu.setA(cpu.getMmu().readByte(hl));
+			cpu.setHL(hl++);
 			return 8;
 		});
 		
@@ -287,15 +369,123 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0x21, cpu -> {
+			//JR NC,r8
+			int despl = cpu.fetchByte();
+			if(cpu.isCarryFlag()) return 8;
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
+		instructions.put((byte)0x2F, cpu -> {
+			//CPL
+			cpu.setA(~cpu.getA());
+			cpu.updateSubstractFlag(true);
+			cpu.updateHalfCarryFlag(true);
+			return 4;
+		});
+		
+		instructions.put((byte)0x30, cpu -> {
+			//JR NC,r8
+			int despl = cpu.fetchByte();
+			if(cpu.isCarryFlag()) return 8;
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
 		instructions.put((byte)0x31, cpu -> {
 			//LD SP,d16
 			cpu.setSp(cpu.fetchWord());
 			return 12;
 		});
 		
+		instructions.put((byte)0x32, cpu -> {
+			//LD (HL-),A
+			int hl = cpu.getHL();
+			cpu.getMmu().writeByte(hl, cpu.getA());
+			cpu.setHL(hl--);
+			return 8;
+		});
+		
 		instructions.put((byte)0x33, cpu -> {
 			//INC SP
 			cpu.setSp(cpu.getSp()+1);
+			return 8;
+		});
+		
+		instructions.put((byte)0x34, cpu -> {
+			//INC (HL)
+			Mmu aux = cpu.getMmu();
+			int hl = cpu.getHL();
+			int value = aux.readWord(hl);
+			int result = (value+1) & 0xFF;
+			
+			cpu.updateZeroFlag((result==0));
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((value & 0xF) + 1) > 0xF);
+			
+			aux.writeByte(hl, result);
+			return 12;
+			
+		});
+		
+		instructions.put((byte)0x35, cpu -> {
+			//DEC (HL)
+			Mmu aux = cpu.getMmu();
+			int hl = cpu.getHL();
+			int value = aux.readWord(hl);
+			int result = (value-1) & 0xFF;
+			
+			cpu.updateZeroFlag((result==0));
+			cpu.updateSubstractFlag(true);
+			cpu.updateHalfCarryFlag((value & 0xF) == 0);
+			
+			aux.writeByte(hl, result);
+			return 12;
+			
+		});
+		
+		instructions.put((byte)0x36, cpu -> {
+			//LD (HL),d8
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.fetchByte());
+			return 12;
+		});
+		
+		instructions.put((byte)0x37, cpu -> {
+			//SCF
+			cpu.updateCarryFlag(true);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(false);
+			return 4;
+		});
+		
+		instructions.put((byte)0x38, cpu -> {
+			//JR C,r8
+			int despl = cpu.fetchByte();
+			if(!cpu.isCarryFlag()) return 8;
+			cpu.setPc(cpu.getPc()+despl);
+			return 12;
+		});
+		
+		instructions.put((byte)0x39, cpu -> {
+			//ADD HL, BC
+			int hl = cpu.getHL();
+			int value = cpu.getSp();
+			int result = hl + value;
+			
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((hl & 0x0FFF) + (value & 0x0FFF)) > 0x0FFF);
+			cpu.updateCarryFlag((hl + value) > 0xFFFF);
+			
+			cpu.setHL(result&0xFFFF);
+			return 8;
+		});
+		
+		instructions.put((byte)0x3A, cpu -> {
+			//LD A,(HL-)
+			int hl = cpu.getHL();
+			cpu.setA(cpu.getMmu().readByte(hl));
+			cpu.setHL(hl--);
 			return 8;
 		});
 		
@@ -333,6 +523,14 @@ public class InstructionSet {
 			//LD A, d8
 			cpu.setA(cpu.fetchByte());
 			return 8;
+		});
+		
+		instructions.put((byte)0x3E, cpu -> {
+			//CCF
+			cpu.updateCarryFlag((cpu.isCarryFlag()) ? false : true);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(false);
+			return 4;
 		});
 		
 		instructions.put((byte)0x40, cpu -> {
@@ -621,6 +819,42 @@ public class InstructionSet {
 			//LD L,A
 			cpu.setL(cpu.getA());
 			return 4;
+		});
+		
+		instructions.put((byte)0x70, cpu -> {
+			//LD (HL),B
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getB());
+			return 8;
+		});
+		
+		instructions.put((byte)0x71, cpu -> {
+			//LD (HL),C
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getC());
+			return 8;
+		});
+		
+		instructions.put((byte)0x72, cpu -> {
+			//LD (HL),D
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getD());
+			return 8;
+		});
+		
+		instructions.put((byte)0x73, cpu -> {
+			//LD (HL),E
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getE());
+			return 8;
+		});
+		
+		instructions.put((byte)0x74, cpu -> {
+			//LD (HL),H
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getH());
+			return 8;
+		});
+		
+		instructions.put((byte)0x75, cpu -> {
+			//LD (HL),L
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.getL());
+			return 8;
 		});
 		
 		instructions.put((byte)0x76, cpu ->{

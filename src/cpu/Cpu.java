@@ -137,8 +137,7 @@ public class Cpu {
 	}
 
 	public void setSp(int sp) {
-		if(sp>0xFFFE || sp<0xC000) throw new RuntimeException("Stack overflow/underflow en la pila");
-		this.sp = sp;
+		this.sp = sp & 0xFFFF;
 	}
 
 	public int getPc() {
@@ -208,8 +207,9 @@ public class Cpu {
 	
 	//función para obtener el siguiente byte a leer
 	public byte fetchByte() {
-		byte value = mmu.readByte(pc); //leemos de memoria
-		pc = (pc>=65535) ? 0 : pc+1;  //avanzamos pc
+		byte value = (byte)(mmu.readByte(pc) & 0xFF); //leemos de memoria
+		pc++;  //avanzamos pc
+		pc &= 0xFFFF; //protegemos pc
 		return value;
 	}
 	
@@ -261,6 +261,7 @@ public class Cpu {
 		Instruction instruction = ins.get(op);
 		if(instruction==null) {
 			System.out.println("Instruction is null on pc = " + this.pc);
+			System.out.println("Instruction is null on pc = " + Integer.toHexString(op));
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);

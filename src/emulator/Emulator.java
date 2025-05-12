@@ -25,7 +25,7 @@ public class Emulator {
 		timer = new Timer(iM);
 		mmu = new Mmu(timer);
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\tetris.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
