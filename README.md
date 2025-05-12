@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 
@@ -1943,3 +1944,7 @@ data-styled.g8[id="Truncate__StyledTruncate-sc-23o1d2-0"]{content:"liVpTx,"}/*!s
   </body>
 </html>
 
+=======
+# My-GameBoy-Emulator
+This is a project about a functional emulator of the classic Gameboy console made in Java.
+>>>>>>> 05ff6fbf8952364e6cf917ec0165fa575e8ecb21
