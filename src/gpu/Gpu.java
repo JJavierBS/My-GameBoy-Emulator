@@ -1,7 +1,5 @@
 package gpu;
 
-import java.util.Random;
-
 import cpu.InterruptionManager;
 import memory.Mmu;
 
@@ -21,7 +19,7 @@ public class Gpu {
 	private int line; 
 	
 	//Importante -> El buffer de dibujado
-	private int[][] frameBuffer;
+	private final int[][] frameBuffer;
 	
 	
 	public Gpu(InterruptionManager iM, Mmu mmu) {

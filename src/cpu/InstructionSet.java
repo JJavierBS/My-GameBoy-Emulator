@@ -1861,6 +1861,13 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0xC7, cpu -> {
+			//RST 00H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0000);
+			return 16;
+		});
+		
 		instructions.put((byte)0xC8, cpu -> {
 			//RET Z
 			if(cpu.isZeroFlag()) {
@@ -1930,6 +1937,13 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0xCF, cpu -> {
+			//RST 08H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0008);
+			return 16;
+		});
+		
 		instructions.put((byte)0xD0, cpu -> {
 			//RET NC
 			if(!cpu.isCarryFlag()) {
@@ -1975,6 +1989,13 @@ public class InstructionSet {
 			
 			cpu.setA(value & 0xFF);
 			return 8;
+		});
+		
+		instructions.put((byte)0xD7, cpu -> {
+			//RST 10H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0010);
+			return 16;
 		});
 		
 		instructions.put((byte)0xD8, cpu -> {
@@ -2026,6 +2047,13 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0xDF, cpu -> {
+			//RST 18H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0018);
+			return 16;
+		});
+		
 		instructions.put((byte)0xE6, cpu -> {
 			//AND d8
 			int value = cpu.getA()&cpu.fetchByte();
@@ -2037,6 +2065,13 @@ public class InstructionSet {
 			cpu.updateHalfCarryFlag(true);
 			cpu.updateCarryFlag(false);
 			return 8;
+		});
+		
+		instructions.put((byte)0xE7, cpu -> {
+			//RST 20H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0020);
+			return 16;
 		});
 		
 		instructions.put((byte)0xEE, cpu -> {
@@ -2052,6 +2087,13 @@ public class InstructionSet {
 			return 8;
 		});
 		
+		instructions.put((byte)0xEF, cpu -> {
+			//RST 28H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0028);
+			return 16;
+		});
+		
 		instructions.put((byte)0xF6, cpu -> {
 			//OR d8
 			int value = cpu.getA()|cpu.fetchByte();
@@ -2063,6 +2105,13 @@ public class InstructionSet {
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(false);
 			return 8;
+		});
+		
+		instructions.put((byte)0xF7, cpu -> {
+			//RST 30H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0030);
+			return 16;
 		});
 		
 		instructions.put((byte)0xFD, cpu -> {
@@ -2084,6 +2133,13 @@ public class InstructionSet {
 			cpu.updateHalfCarryFlag((original&0x0F) < (operand&0x0F));
 			cpu.updateCarryFlag(original < operand);
 			return 8;
+		});
+		
+		instructions.put((byte)0xFF, cpu -> {
+			//RST 38H
+			cpu.pushWord(cpu.getPc());
+			cpu.setPc(0x0038);
+			return 16;
 		});
 		
 		//Comienza la parte de las instrucciones compuestas

@@ -2,7 +2,7 @@ package cpu;
 
 public class InterruptionManager {
 	private final int[] INTERRUPTIONS = {1,2,4,8,16};
-	private int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
+	private final int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
 	//Indexación:
 	//0 -> Vblank
 	//1 -> LCD
