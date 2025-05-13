@@ -1,24 +1,23 @@
 package emulator;
 
-import java.io.File;
-import java.io.IOException;
-
 import cpu.Cpu;
 import cpu.InstructionSet;
 import cpu.InterruptionManager;
 import cpu.Timer;
 import gpu.Gpu;
 import gpu.GpuDisplay;
+import java.io.File;
+import java.io.IOException;
 import memory.Mmu;
 
 public class Emulator {
 	private InterruptionManager iM;
-	private Cpu cpu;
+	private final Cpu cpu;
 	private Mmu mmu;
 	private Timer timer;
-	private InstructionSet instructionSet;
-	private Gpu gpu;
-	private GpuDisplay gpuD;
+	private final InstructionSet instructionSet;
+	private final Gpu gpu;
+	private final GpuDisplay gpuD;
 	
 	public Emulator() {
 		iM = new InterruptionManager();
@@ -95,6 +94,7 @@ public class Emulator {
 		mmu.writeByte(0xFF47, (byte)0b11100100); // Paleta BG: blanco, claro, oscuro, negro
 
 	}
+	
 	
 	
 }

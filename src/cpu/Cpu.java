@@ -10,10 +10,10 @@ public class Cpu {
 	private int sp, pc; //sp=stack pointer && pc=program counter
 	
 	//Referencia a la mmu
-	private Mmu mmu;
+	private final Mmu mmu;
 	
 	//Referencia al timer
-	private Timer timer;
+	private final Timer timer;
 	
 	private boolean halted;
 	
@@ -61,6 +61,16 @@ public class Cpu {
 	public void setB(int b) {
 		this.b = b;
 	}
+	
+	public void setAF(int word) {
+		//aplicamos un and bit a bit con 8 bits
+		this.a = word>>8 & 0XFF;
+		this.f = word & 0XFF;
+	}
+	
+	public int getAF() {
+		return ((a<<8) + f) & 0xFF;
+	}
 
 	public int getC() {
 		return c;
@@ -71,7 +81,7 @@ public class Cpu {
 	}
 	
 	public int getBC() {
-		return (b<<8) + c;
+		return ((b<<8) + c) & 0xFF;
 	}
 	
 	public void setBC(int word) {
@@ -97,7 +107,7 @@ public class Cpu {
 	}
 	
 	public int getDE() {
-		return (d<<8) + e;
+		return ((d<<8) + e) & 0xFF;
 	}
 	
 	public void setDE(int word) {
@@ -123,7 +133,7 @@ public class Cpu {
 	}
 
 	public int getHL() {
-		return (h<<8) + l;
+		return ((h<<8) + l) & 0xFF;
 	}
 	
 	public void setHL(int word) {
@@ -217,8 +227,7 @@ public class Cpu {
 	public int fetchWord() {
 		int value = mmu.readWord(pc);
 		//2 veces ya que un word son 2 bytes
-		pc = (pc>=65535) ? 0 : pc+1;
-		pc = (pc>=65535) ? 0 : pc+1;
+		pc = (pc + 2) & 0xFFFF;
 		return value;
 	}
 	
@@ -232,8 +241,8 @@ public class Cpu {
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte(value & 0xFF); //lowByte
 		this.pushByte(value>>8 & 0xFF); //highByte
+		this.pushByte(value & 0xFF); //lowByte
 	}
 	
 	//saca el byte del final de la pila
@@ -244,9 +253,9 @@ public class Cpu {
 	}
 	
 	public int popWord() {
-		byte highByte = this.popByte();
 		byte lowByte = this.popByte();
-		return lowByte + (highByte<<8); 
+		byte highByte = this.popByte();
+		return (lowByte & 0xFF) + (highByte<<8); 
 	}
 	
 	public void pushPC() {
@@ -258,10 +267,13 @@ public class Cpu {
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
 		byte op = fetchByte();
+		if(pc==65283) {
+			System.out.println("PC = " + pc);
+		}
 		Instruction instruction = ins.get(op);
 		if(instruction==null) {
-			System.out.println("Instruction is null on pc = " + this.pc);
-			System.out.println("Instruction is null on pc = " + Integer.toHexString(op));
+			System.out.println("Instruction is null on pc = " + (this.pc-1));
+			System.out.println("Operation code = " + Integer.toHexString(op) + " Integer -> " + op);
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
@@ -269,6 +281,15 @@ public class Cpu {
 		return cycles;
 	}
 	
+
+	public void inicializateRegisters() {
+		this.setAF(0x01B0);
+		this.setBC(0x0013);
+		this.setDE(0x00D8);
+		this.setHL(0x014D);
+		this.setSp(0xFFFE);
+		this.setPc(0x0100);
+	}
 	
 	
 	@Override
