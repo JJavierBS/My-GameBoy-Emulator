@@ -14,14 +14,20 @@ public class Cpu {
 	
 	//Referencia al timer
 	private final Timer timer;
+
+	//Referencia al interruption manager
+	private final InterruptionManager iM;
 	
-	private boolean halted;
+	//Flags de control
+	private boolean halted, stop;
 	
-	public Cpu(Mmu mmu, Timer timer) {
+	public Cpu(Mmu mmu, Timer timer, InterruptionManager iM) {
 		super();
 		this.mmu = mmu;
 		this.timer=timer;
+		this.iM=iM;
 		halted=false;
+		stop=false;
 		a = 0;
 		f = 0;
 		b = 0;
@@ -64,12 +70,12 @@ public class Cpu {
 	
 	public void setAF(int word) {
 		//aplicamos un and bit a bit con 8 bits
-		this.a = word>>8 & 0XFF;
-		this.f = word & 0XFF;
+		this.a = (word>>8) & 0xFF;
+		this.f = word & 0xFF;
 	}
 	
 	public int getAF() {
-		return ((a<<8) + f) & 0xFF;
+		return ((a<<8) | f) & 0xFFFF;
 	}
 
 	public int getC() {
@@ -81,13 +87,13 @@ public class Cpu {
 	}
 	
 	public int getBC() {
-		return ((b<<8) + c) & 0xFF;
+		return ((b<<8) | c) & 0xFFFF;
 	}
 	
 	public void setBC(int word) {
 		//aplicamos un and bit a bit con 8 bits
-		this.b = word>>8 & 0XFF;
-		this.c = word & 0XFF;
+		this.b = word>>8 & 0xFF;
+		this.c = word & 0xFF;
 	}
 
 	public int getD() {
@@ -107,13 +113,13 @@ public class Cpu {
 	}
 	
 	public int getDE() {
-		return ((d<<8) + e) & 0xFF;
+		return ((d<<8) | e) & 0xFFFF;
 	}
 	
 	public void setDE(int word) {
 		//aplicamos un and bit a bit con 8 bits
-		this.d = word>>8 & 0XFF;
-		this.e = word & 0XFF;
+		this.d = word>>8 & 0xFF;
+		this.e = word & 0xFF;
 	}
 
 	public int getH() {
@@ -133,15 +139,15 @@ public class Cpu {
 	}
 
 	public int getHL() {
-		return ((h<<8) + l) & 0xFF;
+		return ((h<<8) | l) & 0xFFFF;
 	}
 	
 	public void setHL(int word) {
 		//aplicamos un and bit a bit con 8 bits
-		this.h = word>>8 & 0XFF;
-		this.l = word & 0XFF;
+		this.h = word>>8 & 0xFF;
+		this.l = word & 0xFF;
 	}
-	
+
 	public int getSp() {
 		return sp;
 	}
@@ -161,6 +167,14 @@ public class Cpu {
 	public Mmu getMmu() {
 		return this.mmu;
 	}
+
+	public Timer getTimer() {
+		return this.timer;
+	}
+
+	public InterruptionManager getInterruptionManager() {
+		return this.iM;
+	}
 	
 	public void setHalted(boolean value) {
 		this.halted=value;
@@ -168,6 +182,14 @@ public class Cpu {
 	
 	public boolean isHalted() {
 		return this.halted;
+	}
+
+	public void setStop(boolean value) {
+		this.stop=value;
+	}
+
+	public boolean isStop() {
+		return this.stop;
 	}
 
 	//funciones
@@ -266,10 +288,9 @@ public class Cpu {
 	
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
+		if(this.stop) return 0;
 		byte op = fetchByte();
-		if(pc==65283) {
-			System.out.println("PC = " + pc);
-		}
+		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
 		if(instruction==null) {
 			System.out.println("Instruction is null on pc = " + (this.pc-1));
@@ -277,7 +298,7 @@ public class Cpu {
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
-		System.out.println(this.toString());
+		//System.out.println(this.toString());
 		return cycles;
 	}
 	
@@ -295,7 +316,7 @@ public class Cpu {
 	@Override
 	public String toString() {
 		return "Cpu [a=" + a + ", f=" + f + ", b=" + b + ", c=" + c + ", d=" + d + ", e=" + e + ", h=" + h + ", l=" + l
-				+ ", sp=" + sp + ", pc=" + pc + "]";
+				+ ", sp=" + sp + ", pc=" + pc + ", lcdcontrol=" + Integer.toHexString(mmu.readByte(0xFF40)) + "]";
 	}
 	
 	

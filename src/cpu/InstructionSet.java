@@ -1,7 +1,6 @@
 package cpu;
 import java.util.HashMap;
 import java.util.Map;
-
 import memory.Mmu;
 
 
@@ -14,12 +13,23 @@ public class InstructionSet {
 		instructions = new HashMap<>();
 		instructionsCB = new HashMap<>();
 		
-		
 		instructions.put((byte)0x00, cpu -> {
 			//nop
 			return 4;
 		}); 
 		
+		//Instrucciones ignoradas (depuracion)
+
+		instructions.put((byte)0xDD, cpu -> {
+			//nop
+			return 4;
+		});  
+
+		instructions.put((byte)0xFD, cpu -> {
+			//nop
+			return 4;
+		});
+
 		
 		instructions.put((byte)0x01, cpu -> {
 			//LD BC,d16
@@ -131,6 +141,12 @@ public class InstructionSet {
 			//LD C, d8
 			cpu.setC(cpu.fetchByte());
 			return 8;
+		});
+
+		instructions.put((byte)0x10, cpu -> {
+			//STOP 0
+			cpu.setStop(true);
+			return 4;
 		});
 		
 		instructions.put((byte)0x11, cpu -> {
@@ -262,7 +278,7 @@ public class InstructionSet {
 			//LD (HL+),A
 			int hl = cpu.getHL();
 			cpu.getMmu().writeByte(hl, cpu.getA());
-			cpu.setHL(hl++);
+			cpu.setHL(hl+1);
 			return 8;
 		});
 		
@@ -327,7 +343,7 @@ public class InstructionSet {
 			//LD A,(HL+)
 			int hl = cpu.getHL();
 			cpu.setA(cpu.getMmu().readByte(hl));
-			cpu.setHL(hl++);
+			cpu.setHL(hl+1);
 			return 8;
 		});
 		
@@ -369,14 +385,6 @@ public class InstructionSet {
 			return 8;
 		});
 		
-		instructions.put((byte)0x21, cpu -> {
-			//JR NC,r8
-			int despl = cpu.fetchByte();
-			if(cpu.isCarryFlag()) return 8;
-			cpu.setPc(cpu.getPc()+despl);
-			return 12;
-		});
-		
 		instructions.put((byte)0x2F, cpu -> {
 			//CPL
 			cpu.setA(~cpu.getA());
@@ -403,7 +411,7 @@ public class InstructionSet {
 			//LD (HL-),A
 			int hl = cpu.getHL();
 			cpu.getMmu().writeByte(hl, cpu.getA());
-			cpu.setHL(hl--);
+			cpu.setHL(hl-1);
 			return 8;
 		});
 		
@@ -417,7 +425,7 @@ public class InstructionSet {
 			//INC (HL)
 			Mmu aux = cpu.getMmu();
 			int hl = cpu.getHL();
-			int value = aux.readWord(hl);
+			int value = aux.readByte(hl) & 0xFF;
 			int result = (value+1) & 0xFF;
 			
 			cpu.updateZeroFlag((result==0));
@@ -433,7 +441,7 @@ public class InstructionSet {
 			//DEC (HL)
 			Mmu aux = cpu.getMmu();
 			int hl = cpu.getHL();
-			int value = aux.readWord(hl);
+			int value = aux.readByte(hl) & 0xFF;
 			int result = (value-1) & 0xFF;
 			
 			cpu.updateZeroFlag((result==0));
@@ -485,7 +493,7 @@ public class InstructionSet {
 			//LD A,(HL-)
 			int hl = cpu.getHL();
 			cpu.setA(cpu.getMmu().readByte(hl));
-			cpu.setHL(hl--);
+			cpu.setHL(hl-1);
 			return 8;
 		});
 		
@@ -525,9 +533,9 @@ public class InstructionSet {
 			return 8;
 		});
 		
-		instructions.put((byte)0x3E, cpu -> {
+		instructions.put((byte)0x3F, cpu -> {
 			//CCF
-			cpu.updateCarryFlag((cpu.isCarryFlag()) ? false : true);
+			cpu.updateCarryFlag(!cpu.isCarryFlag());
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			return 4;
@@ -2006,6 +2014,15 @@ public class InstructionSet {
 			}
 			return 8;
 		});
+
+		instructions.put((byte)0xD9, cpu -> {
+			//RETI
+			cpu.setPc(cpu.popWord());
+			cpu.getInterruptionManager().setIME(true);
+			return 16;
+		});
+
+
 		
 		instructions.put((byte)0xDA, cpu -> {
 			//JP C, a16
@@ -2053,6 +2070,19 @@ public class InstructionSet {
 			cpu.setPc(0x0018);
 			return 16;
 		});
+
+		instructions.put((byte)0xE0, cpu -> {
+			//LDH (a8), A
+			int inm = cpu.fetchByte();
+			cpu.getMmu().writeByte(0xFF00 + inm, cpu.getA());
+			return 12;
+		});
+
+		instructions.put((byte)0xE2, cpu -> {
+			//LD (C), A
+			cpu.getMmu().writeByte(0xFF00 + cpu.getC(), cpu.getA());
+			return 8;
+		});
 		
 		instructions.put((byte)0xE6, cpu -> {
 			//AND d8
@@ -2071,6 +2101,19 @@ public class InstructionSet {
 			//RST 20H
 			cpu.pushWord(cpu.getPc());
 			cpu.setPc(0x0020);
+			return 16;
+		});
+
+		instructions.put((byte)0xE9, cpu -> {
+			//JP HL
+			cpu.setPc(cpu.getHL());
+			return 4;
+		});
+
+		instructions.put((byte)0xEA, cpu -> {
+			//LD(a16), A
+			int addr = cpu.fetchWord();
+			cpu.getMmu().writeByte(addr, cpu.getA());
 			return 16;
 		});
 		
@@ -2093,6 +2136,25 @@ public class InstructionSet {
 			cpu.setPc(0x0028);
 			return 16;
 		});
+
+		instructions.put((byte)0xF0, cpu -> {
+			//LDH (A), a8
+			int inm = cpu.fetchByte();
+			cpu.setA(cpu.getMmu().readByte(0xFF00 + inm)); 
+			return 12; 
+		});
+
+		instructions.put((byte)0xF2, cpu -> {
+			//LD A, (C)
+			cpu.setA(cpu.getMmu().readByte(0xFF00 + cpu.getC()));
+			return 8;
+		});
+
+		instructions.put((byte)0xF3, cpu -> {
+			//DI
+			cpu.getInterruptionManager().setIME(false);
+			return 4;
+		});
 		
 		instructions.put((byte)0xF6, cpu -> {
 			//OR d8
@@ -2113,14 +2175,20 @@ public class InstructionSet {
 			cpu.setPc(0x0030);
 			return 16;
 		});
-		
-		instructions.put((byte)0xFD, cpu -> {
-			//Finalización de la ejecución (inventada)
-			//La instrucción 0xFD no existe en el repertorio original de gameboy
-			//Esta instrucción se usa en depuración
-			System.exit(0);
-			return 0;
+
+		instructions.put((byte)0xFA, cpu -> {
+			//LD A, (a16)
+			int addr = cpu.fetchWord();
+			cpu.setA(cpu.getMmu().readByte(addr));
+			return 16;
 		});
+
+		instructions.put((byte)0xFB, cpu -> {
+			//EI
+			cpu.getInterruptionManager().setIME(true); 
+			return 4;
+		});
+		
 		
 		instructions.put((byte)0xFE, cpu -> {
 			//CP d8

@@ -29,8 +29,24 @@ public class Gpu {
 		line=0;
 		frameBuffer=new int[HEIGHT][WIDTH];
 		display=null;
+		inicializateRegisters();
 	}
 	
+	private void inicializateRegisters(){
+		mmu.writeByte(0xFF40, 0x91); //LCDC
+		mmu.writeByte(0xFF41, 0x85); //STAT
+		mmu.writeByte(0xFF42, 0x00); //SCY
+		mmu.writeByte(0xFF43, 0x00); //SCX
+		mmu.writeByte(0xFF44, 0x00); //LY -> línea actual
+		mmu.writeByte(0xFF45, 0x00); //LYC -> línea comparativa
+		mmu.writeByte(0xFF46, 0xFF); //DMA -> transferencia de sprites
+		mmu.writeByte(0xFF47, (byte) 0b11100100); //BG Palette (fondo)
+		mmu.writeByte(0xFF48, 0xFF); //OBP0 -> sprite palette 0
+		mmu.writeByte(0xFF49, 0xFF); //OBP1 -> sprite palette 1
+		mmu.writeByte(0xFF4A, 0x00); //WY -> x de la ventana
+		mmu.writeByte(0xFF4B, 0x00); //WX -> y de la ventana
+	}
+
 	public void setDisplay(GpuDisplay display) {
 		this.display=display;
 	}
@@ -89,7 +105,6 @@ public class Gpu {
 	
 	
 	private void drawLine() {
-		System.out.println("Dibujando línea");
 		int lcdControl = mmu.readByte(0xFF40);
 		boolean lcdAvailable = (lcdControl & 0x80) != 0;
 		boolean bgAvailable = (lcdControl & 0x01) !=0;
@@ -133,7 +148,7 @@ public class Gpu {
 			int color = ((high>>bitIndex) & 1) << 1 | ((low >> bitIndex) & 1);
 		
 			int rgb = mapColor(color, bgPalete);
-			System.out.println("tileId: " + tileId + " low: " + low + " high: " + high + " color: " + color);
+			//System.out.println("tileId: " + tileId + " low: " + low + " high: " + high + " color: " + color);
 			frameBuffer[line][x] = rgb;
 			
 		}

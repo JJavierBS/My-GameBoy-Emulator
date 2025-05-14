@@ -1,8 +1,8 @@
 package gpu;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 public class GpuDisplay extends JPanel{
 	private static final int SCALE=3; //Aumentamos el tamaño ya que la pantalla de la gamboy es muy pequeña
@@ -42,7 +42,7 @@ public class GpuDisplay extends JPanel{
 	
 	public void vBlankOccurred() {
 		repaint();
-		System.out.println("Repintando");
+		//System.out.println("Repintando");
 	}
 	
 }
