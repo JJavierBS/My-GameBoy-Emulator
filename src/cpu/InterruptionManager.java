@@ -49,6 +49,7 @@ public class InterruptionManager {
 				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);
+				cpu.setStop(false);
 				return true;
 			}
 		}

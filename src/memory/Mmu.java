@@ -30,6 +30,9 @@ public class Mmu {
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
+		if(addr>=0x8000 && addr<=0x9FFF) {
+			System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+		}
 	}
 	
 	//Leer word

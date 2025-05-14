@@ -24,13 +24,13 @@ public class Emulator {
 		timer = new Timer(iM);
 		mmu = new Mmu(timer);
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\dmg-acid2.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
 			System.exit(1);
 		}
-		cpu = new Cpu(mmu,timer);
+		cpu = new Cpu(mmu,timer,iM);
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
