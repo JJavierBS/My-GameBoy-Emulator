@@ -81,6 +81,8 @@ public class Gpu {
 					mode=1;
 					iM.requestInterrupt(0);
 					display.vBlankOccurred();
+					//printFrameBuffer(); //depuración
+					//printTileInfo(); //depuración
 				}
 				else {
 					mode=2;
@@ -174,6 +176,24 @@ public class Gpu {
 		return this.frameBuffer;
 	}
 	
-	
-	
+	private void printFrameBuffer() {
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				System.out.print(frameBuffer[y][x] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	private void printTileInfo(){
+		System.out.println("\nPrimeros 64 bytes del tilemap:");
+		for (int i = 0x9800; i < 0x9800 + 64; i++) {
+			System.out.printf("%02X ", mmu.readByte(i) & 0xFF);
+		}
+		System.out.println("\nPrimeros 16 bytes de VRAM:");
+		for (int i = 0x8000; i < 0x8000 + 16; i++) {
+			System.out.printf("%02X ", mmu.readByte(i) & 0xFF);
+		}
+	}
+
 }

@@ -1,6 +1,5 @@
 package memory;
 
-import cpu.Timer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,13 +7,11 @@ import java.io.IOException;
 public class Mmu {
 	//Memoria de la mmu
 	byte[] memory;
-	Timer timer; //referencia al timer
 	
 	
-	public Mmu(Timer timer) {
+	public Mmu() {
 		super();
 		this.memory = new byte[0x10000]; //64KB
-		this.timer=timer;
 	}
 	
 	
@@ -32,6 +29,12 @@ public class Mmu {
 		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
 		if(addr>=0x8000 && addr<=0x9FFF) {
 			System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			if(addr>=0x9800){
+				System.out.println("Escribiendo en el tilemap: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			}
+			else {
+				System.out.println("Escribiendo en el tile data: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			}
 		}
 	}
 	

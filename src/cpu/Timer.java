@@ -1,24 +1,26 @@
 package cpu;
 
+import memory.Mmu;
+
 public class Timer {
 	private final int[] PERIODS = {1024, 16, 64, 256}; //Tabla de frecuencias según TAC
-	private int DIV; //Se incrementa a un ratio de 16384Hz
-	private int TIMA;
-	private int TMA;
-	private int TAC; //control (bit 2 -> activado; bits0,1 -> frecuencia)
 	private int divCont;
 	private int timerCont;
 	private InterruptionManager interruptionManager;
+	private Mmu mmu;
+	//Registros:
+	//DIV -> 0xFF04
+	//TIMA -> 0xFF05
+	//TMA -> 0xFF06
+	//TAC -> 0xFF07
 	
-	public Timer(InterruptionManager interruptionManager) {
-		super();
-		DIV=0;
-		TIMA=0;
-		TMA=0;
-		TAC=0;		
+	public Timer(InterruptionManager interruptionManager, Mmu mmu) {
+		super();	
 		divCont=0;
 		timerCont=0;
 		this.interruptionManager=interruptionManager;
+		this.mmu=mmu;
+		this.inicializateRegisters();
 	}
 	
 	
@@ -28,68 +30,64 @@ public class Timer {
 		divCont+=cycles;
 		if(divCont>=256) {
 			divCont-=256;
-			DIV = (DIV + 1) &0XFF; //registro de 8 bits
+			setDIV((getDIV()+1)&0xFF);
 		}
 		
-		if((TAC&0X04)!=0) {
+		if((getTAC()&0X04)!=0) {
 			//si el timer esta activado accedemos a la tabla de frecuencias para comprobar cual es la oportuna
-			int period = PERIODS[TAC & 0x03]; 
+			int period = PERIODS[getTAC() & 0x03]; 
 			timerCont+=cycles;
 			//Ojo, puede que hayamos incrementado demasiados ciclos hasta el punto que haya que incrementar TIMA más de 1 vez, se soluciona con el siguiente while
 			while(timerCont>=period) {
 				timerCont-=period;
-				TIMA++;
+				setTIMA(getTIMA()+1);
 				
 				//TIMA overflow
-				if(TIMA>=0xFF) {
-					TIMA=TMA;
+				if(getTIMA()>=0xFF) {
+					setTIMA(getTMA());
 					//TODO -> LLAMAR A LA INTERRUPCIÓN DEL TIMER -> TIMA OVERFLOW
 				}
 			}
 		}
 	}
 
-
-	public int getDIV() {
-		return DIV;
+	private int getDIV(){
+		return mmu.readByte(0xFF04);
 	}
 
-
-	public void setDIV(int dIV) {
-		DIV = dIV;
+	private void setDIV(int value){
+		mmu.writeByte(0xFF04, value);
 	}
 
-
-	public int getTIMA() {
-		return TIMA;
+	private int getTIMA(){
+		return mmu.readByte(0xFF05);
 	}
 
-
-	public void setTIMA(int tIMA) {
-		TIMA = tIMA;
+	private void setTIMA(int value){
+		mmu.writeByte(0xFF05, value);
 	}
 
-
-	public int getTMA() {
-		return TMA;
+	private int getTMA(){
+		return mmu.readByte(0xFF06);
 	}
 
-
-	public void setTMA(int tMA) {
-		TMA = tMA;
+	private void setTMA(int value){
+		mmu.writeByte(0xFF06, value);
 	}
 
-
-	public int getTAC() {
-		return TAC;
+	private int getTAC(){
+		return mmu.readByte(0xFF07);
 	}
 
-
-	public void setTAC(int tAC) {
-		TAC = tAC;
+	private void setTAC(int value){
+		mmu.writeByte(0xFF07, value);
 	}
 	
-	
-	
+	private void inicializateRegisters(){
+		mmu.writeByte(0xFF04, 0x00); //DIV
+		mmu.writeByte(0xFF05, 0x00); //TIMA
+		mmu.writeByte(0xFF06, 0x00); //TMA
+		mmu.writeByte(0xFF07, 0x00); //TAC
+	}
 	
 }

@@ -21,8 +21,8 @@ public class Emulator {
 	
 	public Emulator() {
 		iM = new InterruptionManager();
-		timer = new Timer(iM);
-		mmu = new Mmu(timer);
+		mmu = new Mmu();
+		timer = new Timer(iM,mmu);
 		try {
 			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\dmg-acid2.gb"));
 		}

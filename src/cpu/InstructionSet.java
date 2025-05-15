@@ -83,8 +83,7 @@ public class InstructionSet {
 			int addr = cpu.fetchWord();
 			int value = cpu.getSp();
 			Mmu mmu = cpu.getMmu();
-			mmu.writeByte(addr, value & 0xFF);
-			mmu.writeByte(addr+1, (value>>8) & 0xFF);
+			mmu.writeWord(addr, value);
 			return 20;
 		});
 		
@@ -143,6 +142,19 @@ public class InstructionSet {
 			return 8;
 		});
 
+		instructions.put((byte)0x0F, cpu -> {
+			//RRC A
+			int value = cpu.getA();
+			int result = ((value & 0xFF) >> 1) | ((value & 0x01) << 7);
+			cpu.setA(result);
+			
+			cpu.updateZeroFlag(result==0);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(false);
+			cpu.updateCarryFlag((value & 0x01)==1);
+			return 4;
+		});
+
 		instructions.put((byte)0x10, cpu -> {
 			//STOP 0
 			cpu.setStop(true);
@@ -199,7 +211,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x18, cpu -> {
 			//JR r8
-			int despl = cpu.fetchByte();
+			int despl = (byte)cpu.fetchByte();
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
 		});
@@ -259,10 +271,23 @@ public class InstructionSet {
 			cpu.setE(cpu.fetchByte());
 			return 8;
 		});
+
+		instructions.put((byte)0x1F, cpu -> {
+			//RLC A
+			int value = cpu.getA();
+			int result = ((value & 0xFF) << 1) | ((value & 0x80) >> 7);
+			cpu.setA(result);
+			
+			cpu.updateZeroFlag(result==0);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(false);
+			cpu.updateCarryFlag((value & 0x80)==0x80);
+			return 4;
+		});
 		
 		instructions.put((byte)0x20, cpu -> {
 			//JR NZ,r8
-			int despl = cpu.fetchByte();
+			int despl = (byte)cpu.fetchByte(); //importante hace el casting a byte para que sea con símbolo!!!
 			if(cpu.isZeroFlag()) return 8;
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
@@ -319,7 +344,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x28, cpu -> {
 			//JR Z,r8
-			int despl = cpu.fetchByte();
+			int despl = (byte)cpu.fetchByte();
 			if(!cpu.isZeroFlag()) return 8;
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
@@ -395,7 +420,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x30, cpu -> {
 			//JR NC,r8
-			int despl = cpu.fetchByte();
+			int despl = (byte)cpu.fetchByte();
 			if(cpu.isCarryFlag()) return 8;
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
@@ -469,7 +494,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x38, cpu -> {
 			//JR C,r8
-			int despl = cpu.fetchByte();
+			int despl = (byte)cpu.fetchByte();
 			if(!cpu.isCarryFlag()) return 8;
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
@@ -2174,6 +2199,13 @@ public class InstructionSet {
 			cpu.pushWord(cpu.getPc());
 			cpu.setPc(0x0030);
 			return 16;
+		});
+
+		instructions.put((byte)0xF8, cpu -> {
+			//LD HL, SP+r8
+			int offset = (byte)cpu.fetchByte();
+			cpu.setHL(cpu.getSp() + offset);
+			return 12;
 		});
 
 		instructions.put((byte)0xFA, cpu -> {
