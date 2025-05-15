@@ -50,6 +50,7 @@ public class InterruptionManager {
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
+				//System.out.println("Interrupción manejada: " + i);
 				return true;
 			}
 		}

@@ -260,24 +260,29 @@ public class Cpu {
 	public void pushByte(int value) {
 		sp--;
 		mmu.writeByte(sp,(byte)(value & 0xFF));
+		if(sp>0xFFFE || sp<0xC000) {
+			System.out.println("sp=" + sp);
+			throw new RuntimeException("Stack overflow");
+		}
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte(value>>8 & 0xFF); //highByte
 		this.pushByte(value & 0xFF); //lowByte
+		this.pushByte(value>>8 & 0xFF); //highByte
 	}
 	
 	//saca el byte del final de la pila
 	public byte popByte() {
 		byte value = mmu.readByte(sp);
 		sp++;
+		if(sp>0xFFFE || sp<0xC000) throw new RuntimeException("Stack overflow");
 		return value;
 	}
 	
 	public int popWord() {
 		byte lowByte = this.popByte();
 		byte highByte = this.popByte();
-		return (lowByte & 0xFF) + (highByte<<8); 
+		return lowByte | (highByte<<8); 
 	}
 	
 	public void pushPC() {
@@ -299,6 +304,10 @@ public class Cpu {
 		}
 		int cycles = instruction.execute(this);
 		//System.out.println(this.toString());
+		//System.out.println(this.pc);
+		if(pc==18475){
+			System.out.printf("");
+		}
 		return cycles;
 	}
 	
