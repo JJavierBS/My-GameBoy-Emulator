@@ -8,6 +8,7 @@ public class Timer {
 	private int timerCont;
 	private InterruptionManager interruptionManager;
 	private Mmu mmu;
+	private Cpu cpu;
 	//Registros:
 	//DIV -> 0xFF04
 	//TIMA -> 0xFF05
@@ -15,7 +16,7 @@ public class Timer {
 	//TAC -> 0xFF07
 	
 	public Timer(InterruptionManager interruptionManager, Mmu mmu) {
-		super();	
+		super();
 		divCont=0;
 		timerCont=0;
 		this.interruptionManager=interruptionManager;
@@ -45,7 +46,8 @@ public class Timer {
 				//TIMA overflow
 				if(getTIMA()>=0xFF) {
 					setTIMA(getTMA());
-					//TODO -> LLAMAR A LA INTERRUPCIÓN DEL TIMER -> TIMA OVERFLOW
+					//Timer interruption
+					interruptionManager.requestInterrupt(2);
 				}
 			}
 		}
@@ -81,6 +83,10 @@ public class Timer {
 
 	private void setTAC(int value){
 		mmu.writeByte(0xFF07, value);
+	}
+
+	public void setCpu(Cpu cpu) {
+		this.cpu = cpu;
 	}
 	
 	private void inicializateRegisters(){

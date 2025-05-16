@@ -4,29 +4,47 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import cpu.InterruptionManager;
+
 public class Mmu {
 	//Memoria de la mmu
 	byte[] memory;
+	private final InterruptionManager interruptionManager;
 	
-	
-	public Mmu() {
+	public Mmu(InterruptionManager interruptionManager) {
 		super();
 		this.memory = new byte[0x10000]; //64KB
+		this.interruptionManager = interruptionManager;
 	}
-	
 	
 	//funciones de lectura/escritura
 	
 	//Leer byte
 	public byte readByte(int addr) {
-		return memory[addr & 0xFFFF];
+		addr = addr & 0xFFFF;
+		if (addr == 0xFF0F) {
+			return (byte)(interruptionManager.getIF() & 0xFF);
+		}
+		if (addr == 0xFFFF) {
+			return (byte)(interruptionManager.getIE() & 0xFF);
+		}
+		return memory[addr];
 
 	}
 	
 	
 	//Escribir byte
 	public void writeByte(int addr, int value) {
-		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
+		addr = addr & 0xFFFF;
+		if (addr == 0xFF0F) {
+			interruptionManager.setIF(value & 0xFF);
+			return;
+		}
+		if (addr == 0xFFFF) {
+			interruptionManager.setIE(value & 0xFF);
+			return;
+		}
+		memory[addr] = (byte)(value & 0xFF);
 		if(addr>=0x8000 && addr<=0x9FFF) {
 			System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
 			if(addr>=0x9800){
@@ -46,8 +64,8 @@ public class Mmu {
 	//Escribir word
 	public void writeWord(int addr, int value) {
 		//primero el lowByte ya que las roms de gamboy funcionan con little-endian
-		memory[addr & 0xFFFF] = (byte)(value & 0xF);
-		memory[(addr + 1) & 0xFFFF] = (byte)((value>>8) & 0xF);
+		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
+		memory[(addr + 1) & 0xFFFF] = (byte)((value>>8) & 0xFF);
 	}
 	
 	//funciones de carga
