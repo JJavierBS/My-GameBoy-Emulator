@@ -19,7 +19,7 @@ public class Cpu {
 	private final InterruptionManager iM;
 	
 	//Flags de control
-	private boolean halted, stop;
+	private boolean halted, stop, pendingIME;
 	
 	public Cpu(Mmu mmu, Timer timer, InterruptionManager iM) {
 		super();
@@ -28,6 +28,7 @@ public class Cpu {
 		this.iM=iM;
 		halted=false;
 		stop=false;
+		pendingIME=false;
 		a = 0;
 		f = 0;
 		b = 0;
@@ -192,6 +193,14 @@ public class Cpu {
 		return this.stop;
 	}
 
+	public void setPendingIME(boolean value) { 
+		this.pendingIME=value;
+	}
+
+	public boolean isPendingIME() {
+		return this.pendingIME;
+	}
+
 	//funciones
 	
 	
@@ -267,22 +276,25 @@ public class Cpu {
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte(value & 0xFF); //lowByte
-		this.pushByte(value>>8 & 0xFF); //highByte
+		this.pushByte((value >> 8) & 0xFF); // high byte
+		this.pushByte(value & 0xFF);        // low byte
 	}
 	
 	//saca el byte del final de la pila
 	public byte popByte() {
 		byte value = mmu.readByte(sp);
 		sp++;
-		if(sp>0xFFFE || sp<0xC000) throw new RuntimeException("Stack overflow");
+		if(sp>0xFFFE || sp<0xC000){
+			System.out.println("sp=" + sp);
+			throw new RuntimeException("Stack underflow");
+		}
 		return value;
 	}
 	
 	public int popWord() {
-		byte lowByte = this.popByte();
-		byte highByte = this.popByte();
-		return lowByte | (highByte<<8); 
+		int lowByte = this.popByte() & 0xFF;
+		int highByte = this.popByte() & 0xFF;
+		return (highByte << 8) | lowByte;
 	}
 	
 	public void pushPC() {
@@ -303,7 +315,7 @@ public class Cpu {
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
-		//System.out.println(this.toString());
+		System.out.println(this.toString());
 		//System.out.println(this.pc);
 		if(pc==18475){
 			System.out.printf("");

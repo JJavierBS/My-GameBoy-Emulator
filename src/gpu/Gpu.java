@@ -55,6 +55,7 @@ public class Gpu {
 	public void step(int cycles) {
 		modeClock+=cycles;
 		
+		int stat = mmu.readByte(0xFF41) & 0xFF;
 		switch(mode) {
 		case 2: //OAM Scan -> Lee los sprites que hay que renderizar
 			//Dura 80 ciclos
@@ -62,6 +63,8 @@ public class Gpu {
 				modeClock-=80;
 				mode=3;
 			}
+			// STAT interrupt: modo 2
+			if((stat & 0x20) != 0) iM.requestInterrupt(1);
 			break;
 		case 3: //VRAM read -> Lee los tiles y dibuja línea
 			//Dura 182 ciclos
@@ -77,6 +80,10 @@ public class Gpu {
 				modeClock-=204;
 				line++;
 				mmu.writeByte(0XFF44, line);
+				// STAT interrupt: modo 0
+				if((stat & 0x08) != 0) iM.requestInterrupt(1);
+				// STAT interrupt: LY==LYC
+				if(line == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(line==144) {
 					mode=1;
 					iM.requestInterrupt(0);
@@ -94,6 +101,10 @@ public class Gpu {
 				modeClock-=456;
 				line++;
 				mmu.writeByte(0xFF44, line);
+				// STAT interrupt: modo 1
+				if((stat & 0x10) != 0) iM.requestInterrupt(1);
+				// STAT interrupt: LY==LYC
+				if(line == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(line>153) {
 					line=0;
 					mmu.writeByte(0xFF44, line);

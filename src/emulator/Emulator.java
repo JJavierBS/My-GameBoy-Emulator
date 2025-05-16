@@ -11,6 +11,7 @@ import java.io.IOException;
 import memory.Mmu;
 
 public class Emulator {
+	private static final int DEFAULT_CYCLES_WHEN_HALTED = 4;
 	private InterruptionManager iM;
 	private final Cpu cpu;
 	private Mmu mmu;
@@ -21,16 +22,17 @@ public class Emulator {
 	
 	public Emulator() {
 		iM = new InterruptionManager();
-		mmu = new Mmu();
+		mmu = new Mmu(iM);
 		timer = new Timer(iM,mmu);
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\dmg-acid2.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
 			System.exit(1);
 		}
 		cpu = new Cpu(mmu,timer,iM);
+		timer.setCpu(cpu);
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
@@ -64,10 +66,21 @@ public class Emulator {
 	//Función principal que se encarga de ejecutar las instrucciones de la ROM
 	public void run() {
 		while(true) {
-			int cycles = cpu.execute(instructionSet);
-			timer.step(cycles);
-			gpu.step(cycles);
-			iM.handleInterrupt(cpu);
+			if(cpu.isHalted()){
+				timer.step(DEFAULT_CYCLES_WHEN_HALTED);
+				gpu.step(DEFAULT_CYCLES_WHEN_HALTED);
+				iM.handleInterrupt(cpu);
+			}
+			else{
+				int cycles = cpu.execute(instructionSet);
+				timer.step(cycles);
+				gpu.step(cycles);
+				iM.handleInterrupt(cpu);
+				if(cpu.isPendingIME()) {
+					iM.setIME(true);
+					cpu.setPendingIME(false);
+				}
+			}
 		}
 	}
 	

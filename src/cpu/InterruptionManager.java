@@ -50,7 +50,8 @@ public class InterruptionManager {
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
-				//System.out.println("Interrupción manejada: " + i);
+				System.out.println("Interrupción manejada: " + i);
+				cpu.setHalted(false); //La cpu deja el modo suspensión
 				return true;
 			}
 		}
