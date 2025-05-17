@@ -1,5 +1,7 @@
 package cpu;
 
+import memory.Mmu;
+
 public class InterruptionManager {
 	private final int[] INTERRUPTIONS = {1,2,4,8,16};
 	private final int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
@@ -9,23 +11,20 @@ public class InterruptionManager {
 	//2 -> Timer
 	//3 -> Serial
 	//4 -> JoyPad
-	private int IF;	//Flag para solicitar interrupciones
-	private int IE;	//Selección de interrupciones con flags
 	private boolean IME; //Permite o no las interrupciones en el sistema (Interrupt Master Enable)
-
+	private final Mmu mmu;
 	
 	
-	public InterruptionManager() {
+	public InterruptionManager(Mmu mmu) {
 		super();
-		IF=0;
-		IE=0;
+		this.mmu = mmu;
 		IME=false;
 	}
 	
 	//Función que permite a otros módulos solicitar interrupciones
 	//Se comprueba después de la ejecución de cada instrucción**
 	public void requestInterrupt(int type) {
-		IF |= INTERRUPTIONS[type];
+		setIF(getIF() | INTERRUPTIONS[type]);
 	}
 	
 	
@@ -37,15 +36,21 @@ public class InterruptionManager {
 	//Función para realizar las interrupciones
 	//Es llamada después de cada instrucción del procesador
 	public boolean handleInterrupt(Cpu cpu) {
-		if(!IME) return false; //las interrupciones están desactivadas		
-		int interruptions=IF & IE;
-		if(interruptions==0) return false; //Comprobar si hay alguna interrupción posible a ejecutar
+		int interruptions = getIF() & getIE();
+		// Si hay interrupción pendiente y la CPU está en HALT, salir de HALT aunque IME=0
+		if(interruptions != 0 && cpu.isHalted()) {
+			cpu.setHalted(false);
+		}
+		if(!IME) {
+			return false; // las interrupciones están desactivadas
+		}
+		if(interruptions == 0) return false; // Comprobar si hay alguna interrupción posible a ejecutar
 		
 		for(int i=0; i<5; i++) {
 			int flag = INTERRUPTIONS[i];
 			if((interruptions & flag)!=0) { //Ejecutar ESA interrupción
 				//Quitamos esta interrupción pendiente
-				IF &= ~flag;
+				setIF(getIF() & ~flag);
 				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);
@@ -59,19 +64,19 @@ public class InterruptionManager {
 	}
 
 	public int getIF() {
-		return IF;
+		return mmu.readByte(0xFF0F);
 	}
 
 	public void setIF(int iF) {
-		IF = iF;
+		mmu.writeByte(0xFF0F, iF);
 	}
 
 	public int getIE() {
-		return IE;
+		return mmu.readByte(0xFFFF);
 	}
 
 	public void setIE(int iE) {
-		IE = iE;
+		mmu.writeByte(0xFFFF, iE);
 	}
 
 	public boolean isIME() {

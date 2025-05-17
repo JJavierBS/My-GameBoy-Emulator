@@ -378,6 +378,26 @@ public class InstructionSet {
 			cpu.setH(cpu.fetchByte());
 			return 8;
 		});
+
+		instructions.put((byte)0x27, cpu -> {
+			//DAA
+			int a = cpu.getA();
+			int result = a;
+			if(cpu.isSubstractFlag()) {
+				if(cpu.isHalfCarryFlag()) result -= 0x06;
+				if(cpu.isCarryFlag()) result -= 0x60;
+			}
+			else {
+				if(cpu.isHalfCarryFlag() || ((a & 0x0F) > 9)) result += 0x06;
+				if(cpu.isCarryFlag() || (a > 0x99)) result += 0x60;
+			}
+			
+			cpu.setA(result & 0xFF);
+			cpu.updateZeroFlag(result==0);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(false);
+			return 4;
+		});
 		
 		instructions.put((byte)0x28, cpu -> {
 			//JR Z,r8
@@ -1897,8 +1917,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xC1, cpu -> {
 			//POP BC
-			cpu.setC(cpu.popByte()); // low byte
-			cpu.setB(cpu.popByte()); // high byte
+			cpu.setBC(cpu.popWord());
 			return 12;
 		});
 
@@ -1934,8 +1953,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xC5, cpu -> {
 			//PUSH BC
-			cpu.pushByte(cpu.getB()); // high byte
-			cpu.pushByte(cpu.getC()); // low byte
+			cpu.pushWord(cpu.getBC());
 			return 16;
 		});
 		
@@ -2048,8 +2066,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xD1, cpu -> {
 			//POP DE
-			cpu.setE(cpu.popByte()); // low byte
-			cpu.setD(cpu.popByte()); // high byte
+			cpu.setDE(cpu.popWord());
 			return 12;
 		});
 		
@@ -2079,8 +2096,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xD5, cpu -> {
 			//PUSH DE
-			cpu.pushByte(cpu.getD()); // high byte
-			cpu.pushByte(cpu.getE()); // low byte
+			cpu.pushWord(cpu.getDE()); 
 			return 16;
 		});
 		
@@ -2179,8 +2195,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xE1, cpu -> {
 			//POP HL
-			cpu.setL(cpu.popByte()); // low byte
-			cpu.setH(cpu.popByte()); // high byte
+			cpu.setHL(cpu.popWord());
 			return 12;
 		});
 
@@ -2192,8 +2207,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0xE5, cpu -> {
 			//PUSH HL
-			cpu.pushByte(cpu.getH()); // high byte
-			cpu.pushByte(cpu.getL()); // low byte
+			cpu.pushWord(cpu.getHL());
 			return 16;
 		});
 
@@ -2281,8 +2295,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xF5, cpu -> {
 			//PUSH AF
-			cpu.pushByte(cpu.getA()); // high byte
-			cpu.pushByte(cpu.getF()); // low byte
+			cpu.pushWord(cpu.getAF());
 			return 16;
 		}); 
 		
