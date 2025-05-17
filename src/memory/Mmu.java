@@ -4,17 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import cpu.InterruptionManager;
-
 public class Mmu {
 	//Memoria de la mmu
 	byte[] memory;
-	private final InterruptionManager interruptionManager;
 	
-	public Mmu(InterruptionManager interruptionManager) {
+	public Mmu() {
 		super();
 		this.memory = new byte[0x10000]; //64KB
-		this.interruptionManager = interruptionManager;
 	}
 	
 	//funciones de lectura/escritura
@@ -22,12 +18,6 @@ public class Mmu {
 	//Leer byte
 	public byte readByte(int addr) {
 		addr = addr & 0xFFFF;
-		if (addr == 0xFF0F) {
-			return (byte)(interruptionManager.getIF() & 0xFF);
-		}
-		if (addr == 0xFFFF) {
-			return (byte)(interruptionManager.getIE() & 0xFF);
-		}
 		return memory[addr];
 
 	}
@@ -36,14 +26,6 @@ public class Mmu {
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr = addr & 0xFFFF;
-		if (addr == 0xFF0F) {
-			interruptionManager.setIF(value & 0xFF);
-			return;
-		}
-		if (addr == 0xFFFF) {
-			interruptionManager.setIE(value & 0xFF);
-			return;
-		}
 		memory[addr] = (byte)(value & 0xFF);
 		if(addr>=0x8000 && addr<=0x9FFF) {
 			System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
@@ -58,7 +40,9 @@ public class Mmu {
 	
 	//Leer word
 	public int readWord(int addr) {
-		return memory[addr & 0xFFFF] + (memory[(addr+1) & 0xFFFF]<<8);
+		int lowByte = memory[addr & 0xFFFF] & 0xFF;
+		int highByte = memory[(addr + 1) & 0xFFFF] & 0xFF;
+		return (highByte << 8) | lowByte;
 	}
 	
 	//Escribir word
@@ -77,11 +61,7 @@ public class Mmu {
 	
 	public void loadROM(File romFile) throws IOException{
 		try (FileInputStream fis = new FileInputStream(romFile)) {
-			byte[] romData = fis.readAllBytes();
-			System.out.println("ROM size: " + romData.length + " bytes");
-			for (int i = 0; i < romData.length && i < 0x8000; i++) {
-				memory[i] = romData[i];
-			}
+			memory = fis.readAllBytes();
 		}
 	}
 	

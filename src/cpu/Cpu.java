@@ -140,7 +140,7 @@ public class Cpu {
 	}
 
 	public int getHL() {
-		return ((h<<8) | l) & 0xFFFF;
+		return (((h & 0Xff)<<8) | (l & 0xFF));
 	}
 	
 	public void setHL(int word) {
@@ -276,8 +276,8 @@ public class Cpu {
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte((value >> 8) & 0xFF); // high byte
 		this.pushByte(value & 0xFF);        // low byte
+		this.pushByte((value >> 8) & 0xFF); // high byte
 	}
 	
 	//saca el byte del final de la pila
@@ -305,10 +305,13 @@ public class Cpu {
 	
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
-		if(this.stop) return 0;
+		if(this.stop || this.halted) return 0;
 		byte op = fetchByte();
 		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
+		if(pc>=0x8000 && (pc<0xC000 || pc>0xDFFF)) {
+			System.out.println("pc out of ROM range: ");
+		}
 		if(instruction==null) {
 			System.out.println("Instruction is null on pc = " + (this.pc-1));
 			System.out.println("Operation code = " + Integer.toHexString(op) + " Integer -> " + op);

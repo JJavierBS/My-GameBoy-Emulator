@@ -21,8 +21,8 @@ public class Emulator {
 	private final GpuDisplay gpuD;
 	
 	public Emulator() {
-		iM = new InterruptionManager();
-		mmu = new Mmu(iM);
+		mmu = new Mmu();
+		iM = new InterruptionManager(mmu);
 		timer = new Timer(iM,mmu);
 		try {
 			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb"));
@@ -66,7 +66,7 @@ public class Emulator {
 	//Función principal que se encarga de ejecutar las instrucciones de la ROM
 	public void run() {
 		while(true) {
-			if(cpu.isHalted()){
+			if(cpu.isHalted() || cpu.isStop()) {
 				timer.step(DEFAULT_CYCLES_WHEN_HALTED);
 				gpu.step(DEFAULT_CYCLES_WHEN_HALTED);
 				iM.handleInterrupt(cpu);
