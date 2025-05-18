@@ -1988,7 +1988,7 @@ public class InstructionSet {
 			return 8;
 		});
 		
-		instructions.put((byte)0xC9, cpu -> {
+		instructions.put((byte)0XC9, cpu -> { 
 			//RET
 			cpu.setPc(cpu.popWord());
 			return 16;
@@ -2272,11 +2272,11 @@ public class InstructionSet {
 		});
 
 		instructions.put((byte)0xF1, cpu -> {
-    		int low = cpu.popByte();  // F 
-    		int high = cpu.popByte(); // A
+    		//POP AF
+			int value = cpu.popWord();
 
-    		cpu.setA(high);
-    		cpu.setF(low & 0xF0); // solo los 4 bits superiores son válidos
+    		cpu.setA((value >> 8) & 0xFF);
+    		cpu.setF(value & 0xF0); // solo los 4 bits superiores son válidos
 
     		return 12;
 		});
@@ -2294,9 +2294,9 @@ public class InstructionSet {
 		});
 
 		instructions.put((byte)0xF5, cpu -> {
-			//PUSH AF
-			cpu.pushWord(cpu.getAF());
-			return 16;
+			//PUSH AF 
+			cpu.pushWord((cpu.getA() << 8) | (cpu.getF() & 0xF0)); 
+			return 16; 
 		}); 
 		
 		instructions.put((byte)0xF6, cpu -> {
@@ -2342,6 +2342,7 @@ public class InstructionSet {
 		instructions.put((byte)0xFB, cpu -> {
 			//EI
 			cpu.setPendingIME(true);
+			System.out.println("Pending IME set to true");
 			return 4;
 		});
 		

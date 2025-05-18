@@ -36,6 +36,7 @@ public class Emulator {
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
+		iM.setIE(0x1F);
 	}
 
 	public Cpu getCpu() {
@@ -66,20 +67,19 @@ public class Emulator {
 	//Función principal que se encarga de ejecutar las instrucciones de la ROM
 	public void run() {
 		while(true) {
-			if(cpu.isHalted() || cpu.isStop()) {
-				timer.step(DEFAULT_CYCLES_WHEN_HALTED);
-				gpu.step(DEFAULT_CYCLES_WHEN_HALTED);
-				iM.handleInterrupt(cpu);
+			int cycles;
+			if(!cpu.isHalted() && !cpu.isStop()) {
+				cycles = cpu.execute(instructionSet);
 			}
 			else{
-				int cycles = cpu.execute(instructionSet);
-				timer.step(cycles);
-				gpu.step(cycles);
-				iM.handleInterrupt(cpu);
-				if(cpu.isPendingIME()) {
-					iM.setIME(true);
-					cpu.setPendingIME(false);
-				}
+				cycles = DEFAULT_CYCLES_WHEN_HALTED;
+			}
+			timer.step(cycles);
+			gpu.step(cycles);
+			iM.handleInterrupt(cpu);
+			if(cpu.isPendingIME()) {
+				iM.setIME(true);
+				cpu.setPendingIME(false);
 			}
 		}
 	}

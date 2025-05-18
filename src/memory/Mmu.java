@@ -18,8 +18,9 @@ public class Mmu {
 	//Leer byte
 	public byte readByte(int addr) {
 		addr = addr & 0xFFFF;
+		//if(addr==0xFFFF) System.out.println("MMU: read IE = " + Integer.toHexString(memory[addr & 0xFFFF] & 0xFF));
 		return memory[addr];
-
+		
 	}
 	
 	
@@ -28,14 +29,15 @@ public class Mmu {
 		addr = addr & 0xFFFF;
 		memory[addr] = (byte)(value & 0xFF);
 		if(addr>=0x8000 && addr<=0x9FFF) {
-			System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			//System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
 			if(addr>=0x9800){
-				System.out.println("Escribiendo en el tilemap: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			//	System.out.println("Escribiendo en el tilemap: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
 			}
 			else {
-				System.out.println("Escribiendo en el tile data: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
+			//	System.out.println("Escribiendo en el tile data: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
 			}
 		}
+		if(addr==0xFFFF) System.out.println("MMU: write IE = " + Integer.toHexString(value));
 	}
 	
 	//Leer word
