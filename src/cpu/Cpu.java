@@ -1,4 +1,7 @@
 package cpu;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import memory.Mmu;
 
 //Esta clase modela el comportamiento de la cpu
@@ -29,17 +32,6 @@ public class Cpu {
 		halted=false;
 		stop=false;
 		pendingIME=false;
-		a = 0;
-		f = 0;
-		b = 0;
-		c = 0;
-		d = 0;
-		e = 0;
-		h = 0;
-		l = 0;
-		//La pila comienza en 0xFFFE y avanza hacia abajo
-		sp = 0xFFFE;
-		pc = 0x0100;
 	}
 	
 
@@ -305,6 +297,11 @@ public class Cpu {
 	
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
+		//log
+		String log = this.toString();
+		System.out.println(log);
+		volcarAFichero(log);
+		//endlog
 		if(this.stop || this.halted) return 0;
 		byte op = fetchByte();
 		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
@@ -318,30 +315,43 @@ public class Cpu {
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
-		//System.out.println(this.toString());
-		//System.out.println(this.pc);
-		if(pc==18475){
-			System.out.printf("");
-		}
+
 		return cycles;
 	}
 	
 
 	public void inicializateRegisters() {
-		this.setAF(0x01B0);
-		this.setBC(0x0013);
-		this.setDE(0x00D8);
-		this.setHL(0x014D);
-		this.setSp(0xFFFE);
+		this.setA(0x01);
+		this.setF(0xB0);
+		this.setB(0x00);
+		this.setC(0x13);
+		this.setD(0x00);
+		this.setE(0xD8);
+		this.setH(0x01);
+		this.setL(0x4D);
+		this.setSp(0xFFFE); 
 		this.setPc(0x0100);
 	}
 	
 	
 	@Override
 	public String toString() {
-		return "Cpu [a=" + a + ", f=" + f + ", b=" + b + ", c=" + c + ", d=" + d + ", e=" + e + ", h=" + h + ", l=" + l
-				+ ", sp=" + sp + ", pc=" + pc + ", lcdcontrol=" + Integer.toHexString(mmu.readByte(0xFF40)) + "]";
+		return "A:" + String.format("%02X", a&0xFF) + " F:" + String.format("%02X", f) + " B:" + String.format("%02X", b) + " C:" + String.format("%02X", c&0xFF) +
+				" D:" + String.format("%02X", d) + " E:" + String.format("%02X", e) + " H:" + String.format("%02X", h) + " L:" + String.format("%02X", l) +
+				" SP:" + String.format("%04X", sp) + " PC:" + String.format("%04X", pc) + " PCMEM:" + String.format("%02X", mmu.readByte(pc)) + "," + String.format("%02X", mmu.readByte(pc+1)) + "," + String.format("%02X", mmu.readByte(pc+2)) + "," + String.format("%02X", mmu.readByte(pc+3));
 	}
 	
-	
+	public void volcarAFichero(String log){
+		try {
+			File file = new File("log.txt");
+			FileWriter fw = new FileWriter(file, true); // true para append
+			fw.write(log);
+			fw.write("\n");
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+//A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD
 }

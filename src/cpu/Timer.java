@@ -6,9 +6,8 @@ public class Timer {
 	private final int[] PERIODS = {1024, 16, 64, 256}; //Tabla de frecuencias según TAC
 	private int divCont;
 	private int timerCont;
-	private InterruptionManager interruptionManager;
-	private Mmu mmu;
-	private Cpu cpu;
+	private final InterruptionManager interruptionManager;
+	private final Mmu mmu;
 	//Registros:
 	//DIV -> 0xFF04
 	//TIMA -> 0xFF05
@@ -85,15 +84,12 @@ public class Timer {
 		mmu.writeByte(0xFF07, value);
 	}
 
-	public void setCpu(Cpu cpu) {
-		this.cpu = cpu;
-	}
 	
 	private void inicializateRegisters(){
 		mmu.writeByte(0xFF04, 0x00); //DIV
 		mmu.writeByte(0xFF05, 0x00); //TIMA
 		mmu.writeByte(0xFF06, 0x00); //TMA
-		mmu.writeByte(0xFF07, 0x00); //TAC
+		mmu.writeByte(0xFF07, 0x05); //TAC
 	}
 	
 }
