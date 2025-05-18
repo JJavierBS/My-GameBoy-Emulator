@@ -22,17 +22,17 @@ public class Emulator {
 	
 	public Emulator() {
 		mmu = new Mmu();
-		iM = new InterruptionManager(mmu);
-		timer = new Timer(iM,mmu);
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\03-op sp,hl.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
 			System.exit(1);
 		}
+		iM = new InterruptionManager(mmu);
+		timer = new Timer(iM,mmu);
 		cpu = new Cpu(mmu,timer,iM);
-		timer.setCpu(cpu);
+		cpu.inicializateRegisters();
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);

@@ -18,6 +18,9 @@ public class Mmu {
 	//Leer byte
 	public byte readByte(int addr) {
 		addr = addr & 0xFFFF;
+		if(addr==0xFF44){
+			return (byte)0x90;
+		}
 		//if(addr==0xFFFF) System.out.println("MMU: read IE = " + Integer.toHexString(memory[addr & 0xFFFF] & 0xFF));
 		return memory[addr];
 		
@@ -26,7 +29,7 @@ public class Mmu {
 	
 	//Escribir byte
 	public void writeByte(int addr, int value) {
-		addr = addr & 0xFFFF;
+		addr &= 0xFFFF;
 		memory[addr] = (byte)(value & 0xFF);
 		if(addr>=0x8000 && addr<=0x9FFF) {
 			//System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
@@ -38,6 +41,9 @@ public class Mmu {
 			}
 		}
 		if(addr==0xFFFF) System.out.println("MMU: write IE = " + Integer.toHexString(value));
+		if(addr==0xFF07){
+			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
+		}
 	}
 	
 	//Leer word
@@ -63,7 +69,10 @@ public class Mmu {
 	
 	public void loadROM(File romFile) throws IOException{
 		try (FileInputStream fis = new FileInputStream(romFile)) {
-			memory = fis.readAllBytes();
+			byte[] rom = fis.readAllBytes();
+			for (int i = 0; i < rom.length; i++) {
+				memory[i] = rom[i];
+			}
 		}
 	}
 	
