@@ -72,7 +72,7 @@ public class Cpu {
 	public void setAF(int word) {
 		//aplicamos un and bit a bit con 8 bits
 		this.a = (word>>8) & 0xFF;
-		this.f = word & 0xFF;
+		this.f = word & 0xF0; //f solo tiene 4 bits significativos 
 	}
 	
 	public int getAF() {
@@ -276,8 +276,8 @@ public class Cpu {
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte(value & 0xFF);        // low byte
 		this.pushByte((value >> 8) & 0xFF); // high byte
+		this.pushByte(value & 0xFF);        // low byte
 	}
 	
 	//saca el byte del final de la pila
@@ -318,7 +318,7 @@ public class Cpu {
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
-		System.out.println(this.toString());
+		//System.out.println(this.toString());
 		//System.out.println(this.pc);
 		if(pc==18475){
 			System.out.printf("");
