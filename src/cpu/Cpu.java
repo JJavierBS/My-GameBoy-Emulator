@@ -6,6 +6,7 @@ import memory.Mmu;
 
 //Esta clase modela el comportamiento de la cpu
 public class Cpu {
+	private int cont = 0;
 	//Registros de 8 bits
 	private int a, f, b, c, d, e, h, l; //Siendo f un marcador de flags y a un acumulador
 		
@@ -76,7 +77,7 @@ public class Cpu {
 	}
 
 	public void setC(int c) {
-		this.c = c;
+		this.c = c & 0xFF;
 	}
 	
 	public int getBC() {
@@ -94,7 +95,7 @@ public class Cpu {
 	}
 
 	public void setD(int d) {
-		this.d = d;
+		this.d = d & 0xFF;
 	}
 
 	public int getE() {
@@ -102,7 +103,7 @@ public class Cpu {
 	}
 
 	public void setE(int e) {
-		this.e = e;
+		this.e = e & 0xFF;
 	}
 	
 	public int getDE() {
@@ -120,7 +121,7 @@ public class Cpu {
 	}
 
 	public void setH(int h) {
-		this.h = h;
+		this.h = h & 0xFF;
 	}
 
 	public int getL() {
@@ -128,7 +129,7 @@ public class Cpu {
 	}
 
 	public void setL(int l) {
-		this.l = l;
+		this.l = l & 0xFF;
 	}
 
 	public int getHL() {
@@ -298,8 +299,9 @@ public class Cpu {
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
 		//log
+		System.out.println(cont++);
 		String log = this.toString();
-		System.out.println(log);
+		//System.out.println(log);
 		volcarAFichero(log);
 		//endlog
 		if(this.stop || this.halted) return 0;
@@ -336,7 +338,7 @@ public class Cpu {
 	
 	@Override
 	public String toString() {
-		return "A:" + String.format("%02X", a&0xFF) + " F:" + String.format("%02X", f) + " B:" + String.format("%02X", b) + " C:" + String.format("%02X", c&0xFF) +
+		return "A:" + String.format("%02X", a&0xFF) + " F:" + String.format("%02X", f) + " B:" + String.format("%02X", b & 0xFF) + " C:" + String.format("%02X", c&0xFF) +
 				" D:" + String.format("%02X", d) + " E:" + String.format("%02X", e) + " H:" + String.format("%02X", h) + " L:" + String.format("%02X", l) +
 				" SP:" + String.format("%04X", sp) + " PC:" + String.format("%04X", pc) + " PCMEM:" + String.format("%02X", mmu.readByte(pc)) + "," + String.format("%02X", mmu.readByte(pc+1)) + "," + String.format("%02X", mmu.readByte(pc+2)) + "," + String.format("%02X", mmu.readByte(pc+3));
 	}
