@@ -44,6 +44,9 @@ public class Mmu {
 		if(addr==0xFF07){
 			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
 		}
+		if(addr==0xFF83){
+			System.out.println("");
+		}
 	}
 	
 	//Leer word
@@ -72,6 +75,9 @@ public class Mmu {
 			byte[] rom = fis.readAllBytes();
 			for (int i = 0; i < rom.length; i++) {
 				memory[i] = rom[i];
+			}
+			for(int i = 0xFF80; i<0xFFFE; i++) {
+				memory[i] = (byte)0xFF;
 			}
 		}
 	}
