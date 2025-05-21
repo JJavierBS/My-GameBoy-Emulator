@@ -39,27 +39,27 @@ public class Cpu {
 	//getters and setters
 	
 	public int getA() {
-		return a;
+		return a&0xFF;
 	}
 
 	public void setA(int a) {
-		this.a = a;
+		this.a = a & 0xFF;
 	}
 
 	public int getF() {
-		return f;
+		return f & 0xF0; //f solo tiene 4 bits significativos
 	}
 
 	public void setF(int f) {
-		this.f = f;
+		this.f = f & 0xF0; //f solo tiene 4 bits significativos
 	}
 
 	public int getB() {
-		return b;
+		return b&0xFF;
 	}
 
 	public void setB(int b) {
-		this.b = b;
+		this.b = b & 0xFF;
 	}
 	
 	public void setAF(int word) {
@@ -73,7 +73,7 @@ public class Cpu {
 	}
 
 	public int getC() {
-		return c;
+		return c & 0xFF;
 	}
 
 	public void setC(int c) {
@@ -91,7 +91,7 @@ public class Cpu {
 	}
 
 	public int getD() {
-		return d;
+		return d & 0xFF;
 	}
 
 	public void setD(int d) {
@@ -99,7 +99,7 @@ public class Cpu {
 	}
 
 	public int getE() {
-		return e;
+		return e & 0xFF;
 	}
 
 	public void setE(int e) {
@@ -117,7 +117,7 @@ public class Cpu {
 	}
 
 	public int getH() {
-		return h;
+		return h & 0xFF;
 	}
 
 	public void setH(int h) {
@@ -125,7 +125,7 @@ public class Cpu {
 	}
 
 	public int getL() {
-		return l;
+		return l & 0xFF;
 	}
 
 	public void setL(int l) {
@@ -143,7 +143,7 @@ public class Cpu {
 	}
 
 	public int getSp() {
-		return sp;
+		return sp & 0xFFFF;
 	}
 
 	public void setSp(int sp) {
@@ -151,11 +151,11 @@ public class Cpu {
 	}
 
 	public int getPc() {
-		return pc;
+		return pc & 0xFFFF;
 	}
 
 	public void setPc(int pc) {
-		this.pc = pc;
+		this.pc = pc & 0xFFFF;
 	}
 	
 	public Mmu getMmu() {
@@ -193,6 +193,7 @@ public class Cpu {
 	public boolean isPendingIME() {
 		return this.pendingIME;
 	}
+
 
 	//funciones
 	
@@ -299,7 +300,10 @@ public class Cpu {
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
 		//log
-		System.out.println(cont++);
+		if(cont%1000==0) {
+			System.out.println(cont);
+		}
+		cont++;
 		String log = this.toString();
 		//System.out.println(log);
 		volcarAFichero(log);
