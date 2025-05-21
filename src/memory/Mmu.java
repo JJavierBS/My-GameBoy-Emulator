@@ -44,9 +44,6 @@ public class Mmu {
 		if(addr==0xFF07){
 			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
 		}
-		if(addr==0xFF83){
-			System.out.println("");
-		}
 	}
 	
 	//Leer word
