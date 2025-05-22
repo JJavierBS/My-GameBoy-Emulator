@@ -75,7 +75,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x06, cpu -> {
 			//LD B, d8
-			cpu.setB(cpu.fetchByte());
+			cpu.setB(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 		
@@ -155,7 +155,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x0E, cpu -> {
 			//LD C, d8
-			cpu.setC(cpu.fetchByte());
+			cpu.setC(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 
@@ -223,7 +223,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x16, cpu -> {
 			//LD D, d8
-			cpu.setD(cpu.fetchByte());
+			cpu.setD(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 
@@ -304,7 +304,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x1E, cpu -> {
 			//LD E, d8
-			cpu.setE(cpu.fetchByte());
+			cpu.setE(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 
@@ -379,7 +379,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x26, cpu -> {
 			//LD H, d8
-			cpu.setH(cpu.fetchByte());
+			cpu.setH(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 
@@ -473,7 +473,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x2E, cpu -> {
 			//LD L, d8
-			cpu.setL(cpu.fetchByte());
+			cpu.setL(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 		
@@ -547,7 +547,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x36, cpu -> {
 			//LD (HL),d8
-			cpu.getMmu().writeByte(cpu.getHL(), cpu.fetchByte());
+			cpu.getMmu().writeByte(cpu.getHL(), cpu.fetchByte() & 0xFF);
 			return 12;
 		});
 		
@@ -621,7 +621,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x3E, cpu -> {
 			//LD A, d8
-			cpu.setA(cpu.fetchByte());
+			cpu.setA(cpu.fetchByte() & 0xFF);
 			return 8;
 		});
 		
@@ -2045,14 +2045,14 @@ public class InstructionSet {
 		instructions.put((byte)0xCE, cpu -> {
 			//ADC A, d8
 			int a = cpu.getA();
-			int b = cpu.fetchByte();
+			int b = cpu.fetchByte() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
+			cpu.updateCarryFlag(value>0xFF);
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(((a & 0xF) + (b & 0xF) + carry) > 0xF);
-			cpu.updateCarryFlag(value>0xFF);
 
 			cpu.setA(value & 0xFF);
 			return 8;
@@ -2177,7 +2177,7 @@ public class InstructionSet {
 		instructions.put((byte)0xDE, cpu -> {
 			//SBC d8
 			int original = cpu.getA();
-			int operand = cpu.fetchByte();
+			int operand = cpu.fetchByte() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -2199,7 +2199,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xE0, cpu -> {
 			//LDH (a8), A
-			int inm = cpu.fetchByte();
+			int inm = cpu.fetchByte() & 0xFF;
 			cpu.getMmu().writeByte(0xFF00 + (inm&0xFF), cpu.getA());
 			return 12;
 		});
@@ -2224,7 +2224,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xE6, cpu -> {
 			//AND d8
-			int value = cpu.getA()&cpu.fetchByte();
+			int value = cpu.getA()&(cpu.fetchByte() & 0xFF);
 			
 			cpu.setA(value & 0xFF);
 
@@ -2291,7 +2291,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xF0, cpu -> {
 			//LDH (A), a8
-			int inm = cpu.fetchByte();
+			int inm = cpu.fetchByte() & 0xFF;
 			cpu.setA(cpu.getMmu().readByte(0xFF00 + (inm & 0xFF)));
 			return 12;
 		});
@@ -2326,7 +2326,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0xF6, cpu -> {
 			//OR d8
-			int value = cpu.getA()|cpu.fetchByte();
+			int value = cpu.getA()|(cpu.fetchByte()& 0xFF);
 			
 			cpu.setA(value & 0xFF);
 			
@@ -2346,8 +2346,19 @@ public class InstructionSet {
 
 		instructions.put((byte)0xF8, cpu -> {
 			//LD HL, SP+r8
-			int offset = (byte)cpu.fetchByte();
-			cpu.setHL(cpu.getSp() + offset);
+			
+			int sp = cpu.getSp();
+			byte offsetByte = (byte) cpu.fetchByte(); // signed
+			int offset = offsetByte; // signed extension
+			int result = sp + offset;
+
+			cpu.updateZeroFlag(false);
+			cpu.updateSubstractFlag(false);
+			cpu.updateHalfCarryFlag(((sp & 0xF) + (offset & 0xF)) > 0xF);
+			cpu.updateCarryFlag(((sp & 0xFF) + (offset & 0xFF)) > 0xFF);
+
+			cpu.setHL(result & 0xFFFF);
+
 			return 12;
 		});
 
