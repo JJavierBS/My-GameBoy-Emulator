@@ -165,7 +165,7 @@ public class InstructionSet {
 			int result = ((value & 0xFF) >> 1) | ((value & 0x01) << 7);
 			cpu.setA(result);
 			
-			cpu.updateZeroFlag((result&0xFF)==0);
+			cpu.updateZeroFlag(false);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag((value & 0x01)==1);
@@ -2792,129 +2792,138 @@ public class InstructionSet {
 		});
 		
 		instructionsCB.put((byte) 0x18, cpu -> {
-			//RR B
-			int bottombit = cpu.getB() & 0x01;
-			int value = (cpu.getB()>>1) & 0xFF;
-			value |= bottombit<<7;
+			// RR B
+			int value = cpu.getB();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value&0xFF)==0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setB(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit==1);
-			
-			cpu.setB(value);
+			cpu.updateCarryFlag(newCarry == 1);
+
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x19, cpu -> {
 			//RR C
-			int original = cpu.getC() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getC();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setC(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setC(value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1A, cpu -> {
 			//RR D
-			int original = cpu.getD() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getD();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setD(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setD(value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1B, cpu -> {
 			//RR E
-			int original = cpu.getE() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getE();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setE(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setE(value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1C, cpu -> {
 			//RR H
-			int original = cpu.getH() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getH();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setH(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setH(value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1D, cpu -> {
 			//RR L
-			int original = cpu.getL() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getL();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setL(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setL(value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1E, cpu -> {
 			//RR (HL)
-			int original = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getMmu().readByte(cpu.getHL());
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.getMmu().writeByte(cpu.getHL(), result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.getMmu().writeByte(cpu.getHL(), value & 0xFF);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x1F, cpu -> {
 			//RR A
-			int original = cpu.getA() & 0xFF;
-			int carryFlag = cpu.isCarryFlag() ? 1 : 0;  
-			int bottombit = original & 0x01;           
-			int value = (original >> 1) | (carryFlag << 7); 
+			int value = cpu.getA();
+			boolean oldCarry = cpu.isCarryFlag(); 
+			int newCarry = value & 0x01;
 
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
+			cpu.setA(result);
+
+			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(bottombit == 1);
+			cpu.updateCarryFlag(newCarry == 1);
 
-			cpu.setA(value & 0xFF);
 			return 8;
 		});
 		

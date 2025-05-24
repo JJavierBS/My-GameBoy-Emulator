@@ -12,10 +12,10 @@ import memory.Mmu;
 
 public class Emulator {
 	private static final int DEFAULT_CYCLES_WHEN_HALTED = 4;
-	private InterruptionManager iM;
+	private final InterruptionManager iM;
 	private final Cpu cpu;
 	private Mmu mmu;
-	private Timer timer;
+	private final Timer timer;
 	private final InstructionSet instructionSet;
 	private final Gpu gpu;
 	private final GpuDisplay gpuD;
@@ -23,7 +23,7 @@ public class Emulator {
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\08-misc instrs.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\10-bit ops.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
