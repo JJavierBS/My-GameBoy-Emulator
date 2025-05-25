@@ -97,7 +97,7 @@ public class InstructionSet {
 		instructions.put((byte)0x08, cpu -> {
 			//LD (a16), SP
 			int addr = cpu.fetchWord();
-			int value = cpu.getSp();
+			int value = cpu.getSp() & 0xFFFF; 
 			Mmu mmu = cpu.getMmu();
 			mmu.writeWord(addr&0xFFFF, value & 0xFFFF);
 			return 20;
@@ -524,7 +524,7 @@ public class InstructionSet {
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(((value & 0xF) + 1) > 0xF);
 
-			aux.writeByte(hl, result);
+			aux.writeByte(hl, result & 0xFF);
 			return 12;
 			
 		});
@@ -540,7 +540,7 @@ public class InstructionSet {
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((value & 0xF) == 0);
 			
-			aux.writeByte(hl, result);
+			aux.writeByte(hl, result & 0xFF);
 			return 12;
 			
 		});
@@ -1140,8 +1140,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x88, cpu -> {
 			//ADC A, B
-			int a = cpu.getA();
-			int b = cpu.getB();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getB() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1156,8 +1156,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x89, cpu -> {
 			//ADC A, C
-			int a = cpu.getA();
-			int b = cpu.getC();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getC() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1172,8 +1172,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x8A, cpu -> {
 			//ADC A, D
-			int a = cpu.getA();
-			int b = cpu.getD();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getD() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1188,8 +1188,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x8B, cpu -> {
 			//ADC A, E
-			int a = cpu.getA();
-			int b = cpu.getE();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getE() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1204,8 +1204,8 @@ public class InstructionSet {
 				
 		instructions.put((byte)0x8C, cpu -> {
 			//ADC A, H
-			int a = cpu.getA();
-			int b = cpu.getH();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getH() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1220,8 +1220,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x8D, cpu -> {
 			//ADC A, L
-			int a = cpu.getA();
-			int b = cpu.getL();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getL() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1236,8 +1236,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x8E, cpu -> {
 			//ADC A, (HL)
-			int a = cpu.getA();
-			int b = cpu.getMmu().readByte(cpu.getHL());
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1253,8 +1253,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x8F, cpu -> {
 			//ADC A, A
-			int a = cpu.getA();
-			int b = cpu.getA();
+			int a = cpu.getA() & 0xFF;
+			int b = cpu.getA() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = a + b + carry;
 
@@ -1382,8 +1382,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x98, cpu -> {
 			//SBC B
-			int original = cpu.getA();
-			int operand = cpu.getB();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getB() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1398,8 +1398,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x99, cpu -> {
 			//SBC C
-			int original = cpu.getA();
-			int operand = cpu.getC();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getC() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1414,8 +1414,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9A, cpu -> {
 			//SBC D
-			int original = cpu.getA();
-			int operand = cpu.getD();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getD() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1430,8 +1430,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9B, cpu -> {
 			//SBC E
-			int original = cpu.getA();
-			int operand = cpu.getE();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getE() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1446,8 +1446,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9C, cpu -> {
 			//SBC H
-			int original = cpu.getA();
-			int operand = cpu.getH();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getH() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1462,8 +1462,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9D, cpu -> {
 			//SBC L
-			int original = cpu.getA();
-			int operand = cpu.getL();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getL() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1478,8 +1478,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9E, cpu -> {
 			//SBC (HL)
-			int original = cpu.getA();
-			int operand = cpu.getMmu().readByte(cpu.getHL());
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1494,8 +1494,8 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x9F, cpu -> {
 			//SBC A
-			int original = cpu.getA();
-			int operand = cpu.getA();
+			int original = cpu.getA() & 0xFF;
+			int operand = cpu.getA() & 0xFF;
 			int carry = (cpu.isCarryFlag()) ? 1 : 0;
 			int value = (original-operand-carry);
 	
@@ -1826,7 +1826,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getB()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getB());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getB()&0xFF));
 		 return 4;
 		});
 		
@@ -1838,7 +1838,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getC()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getC());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getC()&0xFF));
 		 return 4;
 		});
 		
@@ -1850,7 +1850,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getD()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getD());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getD()&0xFF));
 		 return 4;
 		});
 		
@@ -1862,7 +1862,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getE()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getE());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getE()&0xFF));
 		 return 4;
 		});
 		
@@ -1874,7 +1874,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getH()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getH());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getH()&0xFF));
 		 return 4;
 		});
 		
@@ -1886,19 +1886,19 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getL()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getL());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getL()&0xFF));
 		 return 4;
 		});
 		
 		instructions.put((byte)0xBE, cpu -> {
-			//CP B
+			//CP (HL)
 			int original = cpu.getA();
 			int value = ((original-cpu.getMmu().readByte(cpu.getHL())));
 	
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getMmu().readByte(cpu.getHL())&0x0F));
-			cpu.updateCarryFlag(original < cpu.getMmu().readByte(cpu.getHL()));
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getMmu().readByte(cpu.getHL())&0xFF));
 		 return 8;
 		});
 		
@@ -1910,7 +1910,7 @@ public class InstructionSet {
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(true);
 			cpu.updateHalfCarryFlag((original&0x0F) < (cpu.getA()&0x0F));
-			cpu.updateCarryFlag(original < cpu.getA());
+			cpu.updateCarryFlag((original&0xFF) < (cpu.getA()&0xFF));
 		 return 4;
 		});
 		
@@ -2900,7 +2900,7 @@ public class InstructionSet {
 			int newCarry = value & 0x01;
 
 			int result = (value >> 1) | (oldCarry ? 0x80 : 0x00);
-			cpu.getMmu().writeByte(cpu.getHL(), result);
+			cpu.getMmu().writeByte(cpu.getHL(), result & 0xFF);
 
 			cpu.updateZeroFlag((result & 0xFF) == 0);
 			cpu.updateSubstractFlag(false);

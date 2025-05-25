@@ -18,6 +18,9 @@ public class Mmu {
 	//Leer byte
 	public byte readByte(int addr) {
 		addr = addr & 0xFFFF;
+		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
+			addr -= 0x2000; 
+		}
 		if(addr==0xFF44){
 			return (byte)0x90;
 		}
@@ -30,7 +33,11 @@ public class Mmu {
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr &= 0xFFFF;
+		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
+			addr -= 0x2000; 
+		}
 		memory[addr] = (byte)(value & 0xFF);
+		//Debugging v
 		if(addr>=0x8000 && addr<=0x9FFF) {
 			//System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
 			if(addr>=0x9800){
@@ -43,6 +50,9 @@ public class Mmu {
 		if(addr==0xFFFF) System.out.println("MMU: write IE = " + Integer.toHexString(value));
 		if(addr==0xFF07){
 			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
+		}
+		if(addr==0xDEF6){
+			int i =0;
 		}
 	}
 	
