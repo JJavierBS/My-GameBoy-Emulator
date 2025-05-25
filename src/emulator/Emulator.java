@@ -23,7 +23,7 @@ public class Emulator {
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\10-bit ops.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\11-op a,(hl).gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
