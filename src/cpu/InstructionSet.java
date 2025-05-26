@@ -2643,9 +2643,12 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte) 0x0E, cpu -> {
 			//RRC (HL)
-			int bottombit = cpu.getMmu().readByte(cpu.getHL()) & 0x01;
-			int value = (cpu.getMmu().readByte(cpu.getHL())>>1) & 0xFF;
-			value |= bottombit<<7;
+			if(cpu.getCont()>2887340){
+				int x=0;
+			}
+			int original = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);

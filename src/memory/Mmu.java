@@ -24,7 +24,6 @@ public class Mmu {
 		if(addr==0xFF44){
 			return (byte)0x90;
 		}
-		//if(addr==0xFFFF) System.out.println("MMU: read IE = " + Integer.toHexString(memory[addr & 0xFFFF] & 0xFF));
 		return memory[addr];
 		
 	}
@@ -51,7 +50,7 @@ public class Mmu {
 		if(addr==0xFF07){
 			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
 		}
-		if(addr==0xDEF6){
+		if(addr==0xDEF6 && value==0xC0) {
 			int i =0;
 		}
 	}
