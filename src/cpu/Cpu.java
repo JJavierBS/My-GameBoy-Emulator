@@ -194,6 +194,9 @@ public class Cpu {
 		return this.pendingIME;
 	}
 
+	public int getCont() {
+		return cont;
+	}
 
 	//funciones
 	
