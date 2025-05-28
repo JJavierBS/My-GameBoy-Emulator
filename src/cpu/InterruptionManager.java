@@ -51,7 +51,7 @@ public class InterruptionManager {
 			int flag = INTERRUPTIONS[i];
 			if((interruptions & flag)!=0) { //Ejecutar ESA interrupción
 				//Quitamos esta interrupción pendiente
-				setIF(getIF() & ~flag);
+				setIF((getIF() & ~flag) & 0xFF);
 				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);

@@ -23,7 +23,7 @@ public class Emulator {
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\11-op a,(hl).gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\02-interrupts.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
@@ -36,7 +36,6 @@ public class Emulator {
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
-		iM.setIE(0x1F);
 	}
 
 	public Cpu getCpu() {

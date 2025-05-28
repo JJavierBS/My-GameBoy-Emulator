@@ -2017,7 +2017,7 @@ public class InstructionSet {
 		instructions.put((byte)0xCB, cpu -> {
 			//Prefijo CB, se ejecutará la instrucción correspondiente.
 			Instruction inst = instructionsCB.get(cpu.fetchByte());
-			return 4 + inst.execute(cpu);
+			return inst.execute(cpu);
 		});
 
 		instructions.put((byte)0xCC, cpu -> {
@@ -2523,16 +2523,16 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte) 0x06, cpu -> {
 			//RLC (HL)
-			int topbit = (cpu.getMmu().readByte(cpu.getHL()) & 0x80)>>7;
-			int value = (cpu.getMmu().readByte(cpu.getHL())<<1) & 0xFF;
-			value |= topbit;
+			int original = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
+			int topbit = (original & 0x80) >> 7;
+			int value = ((original << 1) | topbit) & 0xFF;
 
-			cpu.updateZeroFlag((value&0xFF)==0);
+			cpu.updateZeroFlag(value == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(topbit==1);
-			
-			cpu.getMmu().writeByte(cpu.getHL(), value & 0xFF);
+			cpu.updateCarryFlag(topbit == 1);
+
+			cpu.getMmu().writeByte(cpu.getHL(), value);
 			return 16;
 		});
 		
@@ -2553,99 +2553,96 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte) 0x08, cpu -> {
 			//RRC B
-			int bottombit = cpu.getB() & 0x01;
-			int value = (cpu.getB()>>1) & 0xFF;
-			value |= bottombit<<7;
-						
+			int original = cpu.getB() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
+
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setB(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x09, cpu -> {
 			//RRC C
-			int bottombit = cpu.getC() & 0x01;
-			int value = (cpu.getC()>>1) & 0xFF;
-			value |= bottombit<<7;
+			int original = cpu.getC() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setC(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x0A, cpu -> {
 			//RRC D
-			int bottombit = cpu.getD() & 0x01;
-			int value = (cpu.getD()>>1) & 0xFF;
-			value |= bottombit<<7;
-						
+			int original = cpu.getD() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
+
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setD(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x0B, cpu -> {
 			//RRC E
-			int bottombit = cpu.getE() & 0x01;
-			int value = (cpu.getE()>>1) & 0xFF;
-			value |= bottombit<<7;
+			int original = cpu.getE() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setE(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x0C, cpu -> {
 			//RRC H
-			int bottombit = cpu.getH() & 0x01;
-			int value = (cpu.getH()>>1) & 0xFF;
-			value |= bottombit<<7;
+			int original = cpu.getH() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setH(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x0D, cpu -> {
 			//RRC L
-			int bottombit = cpu.getL() & 0x01;
-			int value = (cpu.getL()>>1) & 0xFF;
-			value |= bottombit<<7;
+			int original = cpu.getL() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setL(value);
 			return 8;
 		});
 		
 		instructionsCB.put((byte) 0x0E, cpu -> {
 			//RRC (HL)
-			if(cpu.getCont()>2887340){
-				int x=0;
-			}
 			int original = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
 			int bottombit = original & 0x01;
 			int value = (original>>1) | (bottombit<<7);
@@ -2661,15 +2658,15 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte) 0x0F, cpu -> {
 			//RRC A
-			int bottombit = cpu.getA() & 0x01;
-			int value = (cpu.getA()>>1) & 0xFF;
-			value |= bottombit<<7;
+			int original = cpu.getA() & 0xFF;
+			int bottombit = original & 0x01;
+			int value = (original>>1) | (bottombit<<7);
 
 			cpu.updateZeroFlag((value&0xFF)==0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(bottombit==1);
-			
+
 			cpu.setA(value);
 			return 8;
 		});
@@ -2766,16 +2763,16 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte) 0x16, cpu -> {
 			//RL (HL)
-			int topbit = (cpu.getMmu().readByte(cpu.getHL()) & 0x80)>>7;
-			int value = (cpu.getMmu().readByte(cpu.getHL())<<1) & 0xFF;
-			value |= (cpu.isCarryFlag() ? 1 : 0);
-						
-			cpu.updateZeroFlag((value&0xFF)==0);
+			int original = cpu.getMmu().readByte(cpu.getHL()) & 0xFF;
+			int topbit = (original & 0x80) >> 7;
+			int value = ((original << 1) | (cpu.isCarryFlag() ? 1 : 0)) & 0xFF;
+
+			cpu.updateZeroFlag(value == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(topbit==1);
-			
-			cpu.getMmu().writeByte(cpu.getHL(), value & 0xFF);
+			cpu.updateCarryFlag(topbit == 1);
+
+			cpu.getMmu().writeByte(cpu.getHL(), value);
 			return 16;
 		});
 		
@@ -2897,8 +2894,8 @@ public class InstructionSet {
 		});
 		
 		instructionsCB.put((byte) 0x1E, cpu -> {
-			//RR (HL)
-			int value = cpu.getMmu().readByte(cpu.getHL());
+			// RR (HL)
+			int value = cpu.getMmu().readByte(cpu.getHL()) & 0xFF; 
 			boolean oldCarry = cpu.isCarryFlag(); 
 			int newCarry = value & 0x01;
 
@@ -2910,7 +2907,7 @@ public class InstructionSet {
 			cpu.updateHalfCarryFlag(false);
 			cpu.updateCarryFlag(newCarry == 1);
 
-			return 8;
+			return 16;
 		});
 		
 		instructionsCB.put((byte) 0x1F, cpu -> {
@@ -3015,16 +3012,17 @@ public class InstructionSet {
 		});
 		
 		instructionsCB.put((byte) 0x26, cpu -> {
-			//SLA (HL)
-			int topbit = (cpu.getMmu().readByte(cpu.getHL()) & 0x80)>>7;
-			int value = (cpu.getMmu().readByte(cpu.getHL())<<1) & 0xFF;
-						
-			cpu.updateZeroFlag((value & 0xFF) == 0);
+			// SLA (HL)
+			int original = cpu.getMmu().readByte(cpu.getHL());
+			int result = (original << 1) & 0xFF;
+			int topbit = (original & 0x80) >> 7;
+
+			cpu.updateZeroFlag(result == 0);
 			cpu.updateSubstractFlag(false);
 			cpu.updateHalfCarryFlag(false);
-			cpu.updateCarryFlag(topbit==1);
-			
-			cpu.getMmu().writeByte(cpu.getHL(), value & 0xFF);
+			cpu.updateCarryFlag(topbit == 1);
+
+			cpu.getMmu().writeByte(cpu.getHL(), result);
 			return 16;
 		});
 		
