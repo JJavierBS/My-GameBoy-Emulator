@@ -8,6 +8,7 @@ public class Timer {
 	private int timerCont;
 	private final InterruptionManager interruptionManager;
 	private final Mmu mmu;
+	private boolean pendingInterrupt = false;
 	//Registros:
 	//DIV -> 0xFF04
 	//TIMA -> 0xFF05
@@ -40,13 +41,17 @@ public class Timer {
 			//Ojo, puede que hayamos incrementado demasiados ciclos hasta el punto que haya que incrementar TIMA más de 1 vez, se soluciona con el siguiente while
 			while(timerCont>=period) {
 				timerCont-=period;
-				setTIMA(getTIMA()+1);
-				
-				//TIMA overflow
-				if(getTIMA()>=0xFF) {
+				if(getTIMA() == 0xFF) {
+					//Si TIMA es 0xFF, se pone a TMA y se solicita una interrupción para la instruccion siguiente
+					setTIMA(0x00);
+					setPendingInterrupt();
+				} else if(this.pendingInterrupt){
 					setTIMA(getTMA());
-					//Timer interruption
 					interruptionManager.requestInterrupt(2);
+					this.pendingInterrupt=false;
+				}
+				else { 
+					setTIMA((getTIMA()+1)&0xFF);
 				}
 			}
 		}
@@ -82,6 +87,10 @@ public class Timer {
 
 	private void setTAC(int value){
 		mmu.writeByte(0xFF07, value);
+	}
+
+	private void setPendingInterrupt() {
+		this.pendingInterrupt = true;
 	}
 
 	
