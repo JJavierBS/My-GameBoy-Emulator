@@ -6,6 +6,8 @@ import memory.Mmu;
 
 //Esta clase modela el comportamiento de la cpu
 public class Cpu {
+	//depuracion
+	public String log;
 	private int cont = 0;
 	//Registros de 8 bits
 	private int a, f, b, c, d, e, h, l; //Siendo f un marcador de flags y a un acumulador
@@ -302,7 +304,7 @@ public class Cpu {
 	
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
-		if(cont==151344){
+		if(cont==151343){
 			int idgvawuydvwa=0;
 		}
 		//log
@@ -310,9 +312,8 @@ public class Cpu {
 			System.out.println(cont);
 		}
 		cont++;
-		String log = this.toString();
+		log = this.toString();
 		//System.out.println(log);
-		volcarAFichero(log);
 		//endlog
 		if(this.stop || this.halted) return 0;
 		byte op = fetchByte();

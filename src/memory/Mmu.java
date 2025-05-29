@@ -50,7 +50,7 @@ public class Mmu {
 		if(addr==0xFF07){
 			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
 		}
-		if(addr==0xDEF6 && value==0xC0) {
+		if(addr==0xFF0F) {
 			int i =0;
 		}
 	}
@@ -87,6 +87,5 @@ public class Mmu {
 			}
 		}
 	}
-	
 	
 }

@@ -73,13 +73,17 @@ public class Emulator {
 			else{
 				cycles = DEFAULT_CYCLES_WHEN_HALTED;
 			}
-			timer.step(cycles);
-			gpu.step(cycles);
-			iM.handleInterrupt(cpu);
+			int interruptCycles = 0;
+			if(iM.handleInterrupt(cpu)) {
+				interruptCycles = 5; 
+			}
+			timer.step(cycles + interruptCycles);
+			gpu.step(cycles + interruptCycles);
 			if(cpu.isPendingIME()) {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
 			}
+			cpu.volcarAFichero(cpu.log);
 		}
 	}
 	
