@@ -304,9 +304,6 @@ public class Cpu {
 	
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
-		if(cont==151343){
-			int idgvawuydvwa=0;
-		}
 		//log
 		if(cont%1000==0) {
 			System.out.println(cont);

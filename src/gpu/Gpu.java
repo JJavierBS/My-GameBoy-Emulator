@@ -88,8 +88,8 @@ public class Gpu {
 					mode=1;
 					iM.requestInterrupt(0);
 					display.vBlankOccurred();
-					//printFrameBuffer(); //depuración
-					//printTileInfo(); //depuración
+					printFrameBuffer(); //depuración
+					printTileInfo(); //depuración
 				}
 				else {
 					mode=2;
@@ -163,7 +163,11 @@ public class Gpu {
 			int rgb = mapColor(color, bgPalete);
 			//System.out.println("tileId: " + tileId + " low: " + low + " high: " + high + " color: " + color);
 			frameBuffer[line][x] = rgb;
-			
+			if (line == 0 && x == 0) {
+			System.out.printf("Tile ID: %d | Tile Addr: %04X\n", tileId, tileAddress);
+			System.out.printf("Low: %02X, High: %02X\n", low, high);
+			System.out.printf("Color: %d, RGB: %06X\n", color, rgb);
+}
 		}
 	}
 	
