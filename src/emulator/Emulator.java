@@ -5,6 +5,7 @@ import cpu.InstructionSet;
 import cpu.InterruptionManager;
 import cpu.Timer;
 import gpu.Gpu;
+import gpu.GpuDebugger;
 import gpu.GpuDisplay;
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +20,12 @@ public class Emulator {
 	private final InstructionSet instructionSet;
 	private final Gpu gpu;
 	private final GpuDisplay gpuD;
+	private final GpuDebugger gpuDebugger;
 	
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\02-interrupts.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\03-op sp,hl.gb"));
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
@@ -36,6 +38,7 @@ public class Emulator {
 		instructionSet = new InstructionSet();
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
+		gpuDebugger = new GpuDebugger(mmu);
 	}
 
 	public Cpu getCpu() {
@@ -83,7 +86,7 @@ public class Emulator {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
 			}
-			cpu.volcarAFichero(cpu.log);
+			//cpu.volcarAFichero(cpu.log);
 		}
 	}
 	
