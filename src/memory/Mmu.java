@@ -21,9 +21,6 @@ public class Mmu {
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 
 		}
-		if(addr==0xFF44){
-			return (byte)0x90;
-		}
 		return memory[addr];
 		
 	}
@@ -32,26 +29,23 @@ public class Mmu {
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr &= 0xFFFF;
+		if(addr==0xFF46){
+			int sourceHigh = value & 0xFF;
+			int sourceAddress = sourceHigh << 8; //DMA -> transferencia de sprites
+
+			for(int i = 0; i<160; i++){
+				byte data = readByte(sourceAddress + i);
+				writeByte(0xFE00 + i, data);
+			}
+			return; //No se escribe en la memoria, solo se hace la transferencia
+		}
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 
 		}
 		memory[addr] = (byte)(value & 0xFF);
 		//Debugging v
-		if(addr>=0x8000 && addr<=0x9FFF) {
-			//System.out.println("Escribiendo en la VRAM: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
-			if(addr>=0x9800){
-			//	System.out.println("Escribiendo en el tilemap: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
-			}
-			else {
-			//	System.out.println("Escribiendo en el tile data: " + Integer.toHexString(addr) + " valor: " + Integer.toHexString(value));
-			}
-		}
-		if(addr==0xFFFF) System.out.println("MMU: write IE = " + Integer.toHexString(value));
-		if(addr==0xFF07){
-			System.out.println("MMU: write TAC = " + Integer.toHexString(value));
-		}
-		if(addr==0xFF0F) {
-			int i =0;
+		if(addr==0xFFFF){
+			int wdawd = 0;
 		}
 	}
 	

@@ -16,7 +16,6 @@ public class Gpu {
 	
 	private int mode; //0-3, son los modos LCD
 	private int modeClock;	//va a contar los ciclos del modo LCD actual
-	private int line; 
 	
 	//Importante -> El buffer de dibujado
 	private final int[][] frameBuffer;
@@ -26,9 +25,9 @@ public class Gpu {
 		super();
 		this.iM=iM;
 		this.mmu=mmu;
-		line=0;
 		frameBuffer=new int[HEIGHT][WIDTH];
 		display=null;
+		mode=0;
 		inicializateRegisters();
 	}
 	
@@ -41,8 +40,8 @@ public class Gpu {
 		mmu.writeByte(0xFF45, 0x00); //LYC -> línea comparativa
 		mmu.writeByte(0xFF46, 0xFF); //DMA -> transferencia de sprites
 		mmu.writeByte(0xFF47, (byte) 0b11100100); //BG Palette (fondo)
-		mmu.writeByte(0xFF48, 0xFF); //OBP0 -> sprite palette 0
-		mmu.writeByte(0xFF49, 0xFF); //OBP1 -> sprite palette 1
+		mmu.writeByte(0xFF48, 0xFC); //OBP0 -> sprite palette 0
+		mmu.writeByte(0xFF49, 0xFC); //OBP1 -> sprite palette 1
 		mmu.writeByte(0xFF4A, 0x00); //WY -> x de la ventana
 		mmu.writeByte(0xFF4B, 0x00); //WX -> y de la ventana
 	}
@@ -54,7 +53,6 @@ public class Gpu {
 	//Método principal de la GPU
 	public void step(int cycles) {
 		modeClock+=cycles;
-		
 		int stat = mmu.readByte(0xFF41) & 0xFF;
 		switch(mode) {
 		case 2: //OAM Scan -> Lee los sprites que hay que renderizar
@@ -78,18 +76,19 @@ public class Gpu {
 			//Dura 204 ciclos
 			if(modeClock>=204) {
 				modeClock-=204;
-				line++;
-				mmu.writeByte(0XFF44, line);
+				int ln = mmu.readByte(0xFF44) & 0xFF;
+				ln++;
+				mmu.writeByte(0XFF44, ln);
 				// STAT interrupt: modo 0
 				if((stat & 0x08) != 0) iM.requestInterrupt(1);
 				// STAT interrupt: LY==LYC
-				if(line == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
-				if(line==144) {
+				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
+				if(ln>=144) {
 					mode=1;
 					iM.requestInterrupt(0);
 					display.vBlankOccurred();
-					printFrameBuffer(); //depuración
-					printTileInfo(); //depuración
+					//printFrameBuffer(); //depuración
+					//printTileInfo(); //depuración
 				}
 				else {
 					mode=2;
@@ -99,15 +98,16 @@ public class Gpu {
 		case 1: //VBlank -> Espera entre frames y debe lanzar una interrupción
 			if(modeClock>=456) {
 				modeClock-=456;
-				line++;
-				mmu.writeByte(0xFF44, line);
+				int ln = mmu.readByte(0xFF44) & 0xFF;
+				ln++;
+				mmu.writeByte(0xFF44, ln & 0xFF);
 				// STAT interrupt: modo 1
 				if((stat & 0x10) != 0) iM.requestInterrupt(1);
 				// STAT interrupt: LY==LYC
-				if(line == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
-				if(line>153) {
-					line=0;
-					mmu.writeByte(0xFF44, line);
+				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
+				if(ln>153) {
+					ln=0;
+					mmu.writeByte(0xFF44, ln);
 					mode=2;
 				}
 			}
@@ -126,7 +126,7 @@ public class Gpu {
 		
 		int scy = mmu.readByte(0xFF42);
 		int scx = mmu.readByte(0xFF43);
-		int ln = mmu.readByte(0xFF44);
+		int ln = mmu.readByte(0xFF44) & 0xFF;
 		int bgPalete = mmu.readByte(0xFF47) & 0xFF;
 		
 		int tileMapBase = (lcdControl & 0x08)!=0 ? 0x9C00 : 0x9800;
@@ -162,15 +162,55 @@ public class Gpu {
 		
 			int rgb = mapColor(color, bgPalete);
 			//System.out.println("tileId: " + tileId + " low: " + low + " high: " + high + " color: " + color);
-			frameBuffer[line][x] = rgb;
-			if (line == 0 && x == 0) {
-			System.out.printf("Tile ID: %d | Tile Addr: %04X\n", tileId, tileAddress);
-			System.out.printf("Low: %02X, High: %02X\n", low, high);
-			System.out.printf("Color: %d, RGB: %06X\n", color, rgb);
-}
+			if(ln<HEIGHT){
+				frameBuffer[ln][x] = rgb;
+			}
+			if (ln == 0 && x == 0) {
+				//System.out.printf("Tile ID: %d | Tile Addr: %04X\n", tileId, tileAddress);
+				//System.out.printf("Low: %02X, High: %02 X\n", low, high);
+				//System.out.printf("Color: %d, RGB: %06X\n", color, rgb);
+			}
 		}
+		this.drawSprites(ln);
 	}
 	
+	private void drawSprites(int ln){
+		int lcdControl = mmu.readByte(0xFF40);
+		if ((lcdControl & 0x02) == 0) return; // Sprites deshabilitados
+		for (int i = 0; i < 40; i++) { // 40 sprites máximo
+			//System.out.println("Sprite " + i + " en línea " + ln);
+			int spriteAddr = 0xFE00 + i * 4;
+			int y = (mmu.readByte(spriteAddr) & 0xFF) - 16;
+			int x = (mmu.readByte(spriteAddr + 1) & 0xFF) - 8;
+			int tile = mmu.readByte(spriteAddr + 2) & 0xFF;
+			int attr = mmu.readByte(spriteAddr + 3) & 0xFF;
+			int spriteHeight = ((mmu.readByte(0xFF40) & 0x04) != 0) ? 16 : 8;
+			if (ln < y || ln >= y + spriteHeight) continue; // No está en esta línea
+			int row = ln - y;
+			if ((attr & 0x40) != 0) row = spriteHeight - 1 - row; // Y flip
+			int tileAddr = 0x8000 + tile * 16 + row * 2;
+			int low = mmu.readByte(tileAddr) & 0xFF;
+			int high = mmu.readByte(tileAddr + 1) & 0xFF;
+			for (int col = 0; col < 8; col++) {
+				int bit = (attr & 0x20) != 0 ? col : 7 - col; // X flip
+				int colorId = ((high >> bit) & 1) << 1 | ((low >> bit) & 1);
+				if (colorId == 0) continue; // Transparente
+				int px = x + col;
+				if (px < 0 || px >= WIDTH) continue;
+				// Paleta y prioridad pueden ser más complejas, aquí es básico:
+				int palette = (attr & 0x10) != 0 ? mmu.readByte(0xFF49) : mmu.readByte(0xFF48);
+				int rgb = mapColor(colorId, palette);
+				// Prioridad: solo sobrescribe si bit 7 de attr es 0 o el fondo es color 0
+				int bgColor = frameBuffer[ln][px];
+				boolean spriteAboveBg = (attr & 0x80) == 0 || bgColor == mapColor(0, mmu.readByte(0xFF47) & 0xFF);
+				if (spriteAboveBg) {
+					frameBuffer[ln][px] = rgb;
+				}
+			}
+		}
+	}
+
+
 	private int mapColor(int color, int bgPalette) {
 		int shade = (bgPalette >> (color * 2) & 0x03);
 		switch (shade){

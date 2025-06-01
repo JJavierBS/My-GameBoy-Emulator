@@ -41,9 +41,9 @@ public class Timer {
 			//Ojo, puede que hayamos incrementado demasiados ciclos hasta el punto que haya que incrementar TIMA más de 1 vez, se soluciona con el siguiente while
 			while(timerCont>=period) {
 				timerCont-=period;
-				if(getTIMA() == 0xFF) {
+				if((getTIMA()&0xFF) == 0xFF) {
 					//Si TIMA es 0xFF, se pone a TMA y se solicita una interrupción para la instruccion siguiente
-					setTIMA(0x00);
+					setTIMA(getTMA());
 					setPendingInterrupt();
 				} else if(this.pendingInterrupt){
 					setTIMA(getTMA());
