@@ -25,7 +25,7 @@ public class Emulator {
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\03-op sp,hl.gb"));
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb")); //Cargamos la rom
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
@@ -68,6 +68,7 @@ public class Emulator {
 	
 	//Función principal que se encarga de ejecutar las instrucciones de la ROM
 	public void run() {
+		boolean skipInterruptThisCycle = false;
 		while(true) {
 			int cycles;
 			if(!cpu.isHalted() && !cpu.isStop()) {
@@ -77,14 +78,20 @@ public class Emulator {
 				cycles = DEFAULT_CYCLES_WHEN_HALTED;
 			}
 			int interruptCycles = 0;
-			if(iM.handleInterrupt(cpu)) {
-				interruptCycles = 5; 
+			if(skipInterruptThisCycle){
+				skipInterruptThisCycle = false;
+			}
+			else{
+				if(iM.handleInterrupt(cpu)) {
+					interruptCycles = 5; 
+				}
 			}
 			timer.step(cycles + interruptCycles);
 			gpu.step(cycles + interruptCycles);
 			if(cpu.isPendingIME()) {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
+				skipInterruptThisCycle = true; // Evitar interrupciones en este ciclo
 			}
 			//cpu.volcarAFichero(cpu.log);
 		}

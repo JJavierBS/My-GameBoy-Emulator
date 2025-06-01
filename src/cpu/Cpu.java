@@ -306,7 +306,7 @@ public class Cpu {
 	public int execute(InstructionSet ins) {
 		//log
 		if(cont%1000==0) {
-			System.out.println(cont);
+			//System.out.println(cont);
 		}
 		cont++;
 		log = this.toString();

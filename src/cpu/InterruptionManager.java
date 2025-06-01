@@ -24,7 +24,7 @@ public class InterruptionManager {
 	//Función que permite a otros módulos solicitar interrupciones
 	//Se comprueba después de la ejecución de cada instrucción**
 	public void requestInterrupt(int type) {
-		if(type!=0) System.out.println("Solicitada interrupción tipo: " + type);
+		System.out.println("Interrupción solicitada: " + type);
 		setIF(getIF() | INTERRUPTIONS[type]);
 	}
 	
