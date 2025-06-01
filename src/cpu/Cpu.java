@@ -25,7 +25,7 @@ public class Cpu {
 	private final InterruptionManager iM;
 	
 	//Flags de control
-	private boolean halted, stop, pendingIME;
+	private boolean halted, stop, pendingIME, haltBug;
 	
 	public Cpu(Mmu mmu, Timer timer, InterruptionManager iM) {
 		super();
@@ -35,6 +35,7 @@ public class Cpu {
 		halted=false;
 		stop=false;
 		pendingIME=false;
+		haltBug=false;
 	}
 	
 
@@ -200,6 +201,14 @@ public class Cpu {
 		return cont;
 	}
 
+	public boolean isHaltBug() {
+		return haltBug;
+	}
+
+	public void setHaltBug(boolean haltBug) {
+		this.haltBug = haltBug;
+	}
+
 	//funciones
 	
 	
@@ -310,10 +319,18 @@ public class Cpu {
 		}
 		cont++;
 		log = this.toString();
-		//System.out.println(log);
+		System.out.println(log);
 		//endlog
 		if(this.stop || this.halted) return 0;
-		byte op = fetchByte();
+		byte op;
+		if(!haltBug){
+			op = fetchByte();
+		}
+		else{
+			pc--;
+			op=fetchByte();
+			haltBug=false;
+		}
 		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
 		if(pc>=0x8000 && (pc<0xC000 || pc>0xDFFF)) {

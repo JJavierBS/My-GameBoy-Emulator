@@ -959,7 +959,12 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x76, cpu ->{
 			//HALT
-			cpu.setHalted(true);
+			if(!cpu.getInterruptionManager().isIME() & cpu.getInterruptionManager().getIF() != 0) {
+				cpu.setHaltBug(true);
+			}
+			else{
+				cpu.setHalted(true); 
+			}
 			return 4;
 		});
 		
