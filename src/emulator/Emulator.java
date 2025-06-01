@@ -25,7 +25,7 @@ public class Emulator {
 	public Emulator() {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\cpu_instrs.gb")); //Cargamos la rom
+			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\03-op sp,hl.gb")); //Cargamos la rom
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");

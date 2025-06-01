@@ -8,7 +8,8 @@ public class Timer {
 	private int timerCont;
 	private final InterruptionManager interruptionManager;
 	private final Mmu mmu;
-	private boolean pendingInterrupt = false;
+	private boolean TIMAOverflow;
+	private int TIMADelayCounter=0;
 	//Registros:
 	//DIV -> 0xFF04
 	//TIMA -> 0xFF05
@@ -42,17 +43,25 @@ public class Timer {
 			while(timerCont>=period) {
 				timerCont-=period;
 				if((getTIMA()&0xFF) == 0xFF) {
-					//Si TIMA es 0xFF, se pone a TMA y se solicita una interrupción para la instruccion siguiente
-					setTIMA(getTMA());
-					setPendingInterrupt();
-				} else if(this.pendingInterrupt){
-					setTIMA(getTMA());
-					interruptionManager.requestInterrupt(2);
-					this.pendingInterrupt=false;
-				}
+					if(!TIMAOverflow) {
+						TIMAOverflow = true; //Se ha producido un overflow, se incrementará TIMA en el siguiente ciclo
+						TIMADelayCounter = 0; //Reiniciamos el contador de delay
+						setTIMA(0x00);
+					}
+				} 
 				else { 
 					setTIMA((getTIMA()+1)&0xFF);
 				}
+			}
+		}
+		
+		if (TIMAOverflow) {
+			TIMADelayCounter += cycles;
+			if (TIMADelayCounter >= 4) {
+				TIMAOverflow = false;
+				TIMADelayCounter = 0;
+				setTIMA(getTMA());
+				interruptionManager.requestInterrupt(2);
 			}
 		}
 	}
@@ -87,10 +96,6 @@ public class Timer {
 
 	private void setTAC(int value){
 		mmu.writeByte(0xFF07, value);
-	}
-
-	private void setPendingInterrupt() {
-		this.pendingInterrupt = true;
 	}
 
 	
