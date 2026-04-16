@@ -2297,8 +2297,9 @@ public class InstructionSet {
 		instructions.put((byte)0xF0, cpu -> {
 			//LDH (A), a8
 			int inm = cpu.fetchByte() & 0xFF;
+			cpu.stepHardware(4);
 			cpu.setA(cpu.getMmu().readByte(0xFF00 + (inm & 0xFF)));
-			return 12;
+			return 8;
 		});
 
 		instructions.put((byte)0xF1, cpu -> {
@@ -2376,8 +2377,9 @@ public class InstructionSet {
 		instructions.put((byte)0xFA, cpu -> {
 			//LD A, (a16)
 			int addr = cpu.fetchWord();
+			cpu.stepHardware(8);
 			cpu.setA(cpu.getMmu().readByte(addr));
-			return 16;
+			return 8;
 		});
 
 		instructions.put((byte)0xFB, cpu -> {
@@ -3466,8 +3468,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x46, cpu -> {
 			//BIT 0, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 0, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x47, cpu -> {
@@ -3514,8 +3517,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x4E, cpu -> {
 			//BIT 1, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 1, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x4F, cpu -> {
@@ -3562,8 +3566,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x56, cpu -> {
 			//BIT 2, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 2, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x57, cpu -> {
@@ -3610,8 +3615,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x5E, cpu -> {
 			//BIT 3, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 3, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x5F, cpu -> {
@@ -3658,8 +3664,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x66, cpu -> {
 			//BIT 4, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 4, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x67, cpu -> {
@@ -3706,8 +3713,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x6E, cpu -> {
 			//BIT 5, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 5, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x6F, cpu -> {
@@ -3754,8 +3762,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x76, cpu -> {
 			//BIT 6, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 6, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x77, cpu -> {
@@ -3802,8 +3811,9 @@ public class InstructionSet {
 		
 		instructionsCB.put((byte)0x7E, cpu -> {
 			//BIT 7, (HL)
+			cpu.stepHardware(4);
 			BITgenericOperation(cpu, 7, cpu.getMmu().readByte(cpu.getHL()));
-			return 16;
+			return 8;
 		});
 		
 		instructionsCB.put((byte)0x7F, cpu -> {
