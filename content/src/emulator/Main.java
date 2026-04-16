@@ -19,7 +19,14 @@ public class Main {
 		rom[0x0105]=0x00;
 		*/
 		
-		Emulator emulator = new Emulator();
+		String romPath = args.length > 0 ? String.join(" ", args) : "romTest/tetris.gb";
+		
+		java.io.File file = new java.io.File(romPath);
+		if (!file.exists() && new java.io.File("content/" + romPath).exists()) {
+			romPath = "content/" + romPath;
+		}
+
+		Emulator emulator = new Emulator(romPath);
 		emulator.run();
 		
 		

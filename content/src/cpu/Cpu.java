@@ -319,7 +319,7 @@ public class Cpu {
 		}
 		cont++;
 		log = this.toString();
-		System.out.println(log);
+		//System.out.println(log);
 		//endlog
 		if(this.stop || this.halted) return 0;
 		byte op;
