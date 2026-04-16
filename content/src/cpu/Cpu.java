@@ -212,7 +212,20 @@ public class Cpu {
 	//funciones
 	
 	
-	//funciones de flags
+	private int extraGpuCycles = 0;
+
+	public void stepHardware(int cycles) {
+		this.timer.step(cycles);
+		this.extraGpuCycles += cycles;
+	}
+
+	public int consumeExtraGpuCycles() {
+		int e = this.extraGpuCycles;
+		this.extraGpuCycles = 0;
+		return e;
+	}
+
+	//Funciones de flags
 	public void updateZeroFlag(boolean value) {
 		if(value) f = f | 0x80; //or lógico
 		else f = f & ~0x80; //and lógico con el complementario

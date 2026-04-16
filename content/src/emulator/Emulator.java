@@ -87,7 +87,7 @@ public class Emulator {
 				}
 			}
 			timer.step(cycles + interruptCycles);
-			gpu.step(cycles + interruptCycles);
+			gpu.step(cycles + interruptCycles + cpu.consumeExtraGpuCycles());
 			if(cpu.isPendingIME()) {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
