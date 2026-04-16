@@ -42,6 +42,9 @@ public class Mmu {
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 
 		}
+		if (addr == 0xFF02 && value == 0x81) {
+			System.out.print((char)memory[0xFF01]);
+		}
 		memory[addr] = (byte)(value & 0xFF);
 		//Debugging v
 		if(addr==0xFFFF){

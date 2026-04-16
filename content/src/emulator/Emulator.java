@@ -22,10 +22,10 @@ public class Emulator {
 	private final GpuDisplay gpuD;
 	private final GpuDebugger gpuDebugger;
 	
-	public Emulator() {
+	public Emulator(String romPath) {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File("C:\\Users\\josej\\eclipse-workspace\\myGameBoyEmulator\\romTest\\03-op sp,hl.gb")); //Cargamos la rom
+			mmu.loadROM(new File(romPath)); //Cargamos la rom
 		}
 		catch (IOException e){
 			System.out.println("No se ha podido cargar la ROM corréctamente");
