@@ -324,6 +324,11 @@ public class Cpu {
 	
 	//Funciones independientes
 	
+	private String[] trace = new String[20];
+	private int traceIndex = 0;
+
+	private int oobCount = 0;
+
 	//Función para ejeutar
 	public int execute(InstructionSet ins) {
 		//log
@@ -346,8 +351,21 @@ public class Cpu {
 		}
 		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
-		if(pc>=0x8000 && (pc<0xC000 || pc>0xDFFF)) {
-			System.out.println("pc out of ROM range: ");
+		trace[traceIndex] = String.format("PC: %04X, Opcode: %02X", pc - 1, op);
+		traceIndex = (traceIndex + 1) % trace.length;
+		if((pc>=0x8000 && pc<0xA000) || (pc>=0xC000 && pc<0xC000) || (pc>0xDFFF && pc<0xFF80)) {
+			oobCount++;
+			if (oobCount == 1) {
+				System.out.println("FATAL: PC out of valid executable range! PC: " + String.format("%04X", pc));
+				System.out.println("Last 20 instructions:");
+				for (int i = 0; i < trace.length; i++) {
+					int idx = (traceIndex + i) % trace.length;
+					if (trace[idx] != null) {
+						System.out.println(trace[idx]);
+					}
+				}
+				System.exit(1);
+			}
 		}
 		if(instruction==null) {
 			System.out.println("Instruction is null on pc = " + (this.pc-1));
