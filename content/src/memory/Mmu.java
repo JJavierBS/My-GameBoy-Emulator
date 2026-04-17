@@ -7,6 +7,14 @@ import java.io.IOException;
 public class Mmu {
 	//Memoria de la mmu
 	byte[] memory;
+	byte[] romData;
+	int romBank = 1;
+	boolean isMBC1 = false;
+	cpu.Timer timer;
+	
+	public void setTimer(cpu.Timer timer) {
+		this.timer = timer;
+	}
 	
 	public Mmu() {
 		super();
@@ -21,14 +29,39 @@ public class Mmu {
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 
 		}
+		if (addr < 0x4000) {
+			if (romData != null && addr < romData.length) return romData[addr];
+			return memory[addr];
+		} else if (addr >= 0x4000 && addr < 0x8000) {
+			if (romData != null) {
+				int offset = (romBank * 0x4000) + (addr - 0x4000);
+				if (offset < romData.length) return romData[offset];
+			}
+			return memory[addr];
+		}
 		return memory[addr];
 		
 	}
 	
 	
+	public void forceWriteByte(int addr, int value) {
+		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
+	}
+	
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr &= 0xFFFF;
+		if (addr < 0x8000) {
+			if (isMBC1 && addr >= 0x2000 && addr < 0x4000) {
+				romBank = value & 0x1F;
+				if (romBank == 0) romBank = 1;
+			}
+			return; // ROM is read-only
+		}
+		if (addr == 0xFF04) {
+			value = 0;
+			if (timer != null) timer.resetInternalCounters();
+		}
 		if(addr==0xFF46){
 			int sourceHigh = value & 0xFF;
 			int sourceAddress = sourceHigh << 8; //DMA -> transferencia de sprites
@@ -46,39 +79,46 @@ public class Mmu {
 			System.out.print((char)memory[0xFF01]);
 		}
 		memory[addr] = (byte)(value & 0xFF);
-		//Debugging v
-		if(addr==0xFFFF){
-			int wdawd = 0;
-		}
 	}
 	
 	//Leer word
 	public int readWord(int addr) {
-		int lowByte = memory[addr & 0xFFFF] & 0xFF;
-		int highByte = memory[(addr + 1) & 0xFFFF] & 0xFF;
+		int lowByte = readByte(addr) & 0xFF;
+		int highByte = readByte((addr + 1) & 0xFFFF) & 0xFF;
 		return (highByte << 8) | lowByte;
 	}
 	
 	//Escribir word
 	public void writeWord(int addr, int value) {
-		//primero el lowByte ya que las roms de gamboy funcionan con little-endian
-		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
-		memory[(addr + 1) & 0xFFFF] = (byte)((value>>8) & 0xFF);
+		writeByte(addr, value & 0xFF);
+		writeByte((addr + 1) & 0xFFFF, (value >> 8) & 0xFF);
 	}
 	
 	//funciones de carga
 	public void loadROM(byte[] rom, int index) {
 		for(byte b : rom) {
-			memory[index++]=b;
+			if (index < memory.length) memory[index++] = b;
 		}
 	};
 	
 	public void loadROM(File romFile) throws IOException{
 		try (FileInputStream fis = new FileInputStream(romFile)) {
-			byte[] rom = fis.readAllBytes();
-			for (int i = 0; i < rom.length; i++) {
-				memory[i] = rom[i];
+			romData = fis.readAllBytes();
+			
+			// Load only up to 32KB into memory array to not overwrite VRAM etc
+			int limit = Math.min(romData.length, 0x8000);
+			for (int i = 0; i < limit; i++) {
+				memory[i] = romData[i];
 			}
+			
+			if (romData.length > 0x147) {
+				int cartType = romData[0x147] & 0xFF;
+				// MBC1
+				if (cartType == 1 || cartType == 2 || cartType == 3) {
+					isMBC1 = true;
+				}
+			}
+			
 			for(int i = 0xFF80; i<0xFFFE; i++) {
 				memory[i] = (byte)0xFF;
 			}
