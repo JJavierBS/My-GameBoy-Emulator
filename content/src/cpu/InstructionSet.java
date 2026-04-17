@@ -959,7 +959,7 @@ public class InstructionSet {
 		
 		instructions.put((byte)0x76, cpu ->{
 			//HALT
-			if(!cpu.getInterruptionManager().isIME() & cpu.getInterruptionManager().getIF() != 0) {
+			if(!cpu.getInterruptionManager().isIME() && (cpu.getInterruptionManager().getIF() & cpu.getInterruptionManager().getIE() & 0x1F) != 0) {
 				cpu.setHaltBug(true);
 			}
 			else{
@@ -2149,7 +2149,7 @@ public class InstructionSet {
 		instructions.put((byte)0xD9, cpu -> {
 			//RETI
 			cpu.setPc(cpu.popWord());
-			cpu.getInterruptionManager().setIME(true);
+			System.out.println("IME set to true at PC: " + cpu.getPc()); cpu.getInterruptionManager().setIME(true);
 			return 16;
 		});
 
@@ -2384,8 +2384,8 @@ public class InstructionSet {
 
 		instructions.put((byte)0xFB, cpu -> {
 			//EI
-			cpu.setPendingIME(true);
-			System.out.println("Pending IME set to true");
+			System.out.println("EI executed at PC: " + cpu.getPc()); System.out.println("EI executed at PC: " + cpu.getPc() + ", SP: " + cpu.getSp()); cpu.setPendingIME(true);
+			// System.out.println("Pending IME set to true");
 			return 4;
 		});
 		

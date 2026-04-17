@@ -25,6 +25,10 @@ public class Mmu {
 	
 	//Leer byte
 	public byte readByte(int addr) {
+		addr &= 0xFFFF;
+		if (addr == 0xFF00) {
+			return (byte)((memory[0xFF00] & 0x30) | 0x0F);
+		}
 		addr = addr & 0xFFFF;
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 

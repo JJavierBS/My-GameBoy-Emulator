@@ -24,7 +24,6 @@ public class Gpu {
 	private boolean windowEnable;
 	private int wx, wy;
 	private int windowLineCounter;
- 	private int frameCounter = 0;
 	private boolean renderedWindow;
 	
 	public Gpu(InterruptionManager iM, Mmu mmu) {
@@ -98,11 +97,6 @@ public class Gpu {
 				// STAT interrupt: LY==LYC
 				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(ln>=144) {
- 					frameCounter++;
- 					if (frameCounter == 300) {
-						gpu.ImageDumper.dump(frameBuffer, "tetris_output.png");
-						System.exit(0);
-					}
 					mode=1;
 					iM.requestInterrupt(0);
 					if (display != null) display.vBlankOccurred();
