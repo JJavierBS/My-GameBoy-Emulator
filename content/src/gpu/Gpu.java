@@ -24,6 +24,7 @@ public class Gpu {
 	private boolean windowEnable;
 	private int wx, wy;
 	private int windowLineCounter;
+ 	private int frameCounter = 0;
 	private boolean renderedWindow;
 	
 	public Gpu(InterruptionManager iM, Mmu mmu) {
@@ -58,6 +59,13 @@ public class Gpu {
 	
 	//Método principal de la GPU
 	public void step(int cycles) {
+ 		boolean lcdAvailable = (mmu.readByte(0xFF40) & 0x80) != 0;
+		if(!lcdAvailable) {
+			modeClock = 0;
+			mode = 0;
+			mmu.writeByte(0xFF44, 0);
+			return;
+		}
 		modeClock+=cycles;
 		int stat = mmu.readByte(0xFF41) & 0xFF;
 		switch(mode) {
@@ -90,6 +98,11 @@ public class Gpu {
 				// STAT interrupt: LY==LYC
 				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(ln>=144) {
+ 					frameCounter++;
+ 					if (frameCounter == 300) {
+						gpu.ImageDumper.dump(frameBuffer, "tetris_output.png");
+						System.exit(0);
+					}
 					mode=1;
 					iM.requestInterrupt(0);
 					if (display != null) display.vBlankOccurred();
@@ -254,13 +267,13 @@ public class Gpu {
 		int shade = (bgPalette >> (color * 2) & 0x03);
 		switch (shade){
 		case 0:
-			return 0xFFFFFF; //blanco
+			return 0xFFFFFFFF; //blanco
 		case 1:
-			return 0xAAAAAA; //gris claro
+			return 0xFFAAAAAA; //gris claro
 		case 2:
-			return 0x555555; //gris oscuro
+			return 0xFF555555; //gris oscuro
 		case 3:
-			return 0x00000000; //negro
+			return 0xFF000000; //negro
 		default:
 			return 0xFF00FF; //error
 		}

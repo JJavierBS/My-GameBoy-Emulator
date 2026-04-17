@@ -330,10 +330,15 @@ public class Cpu {
 	private int oobCount = 0;
 
 	//Función para ejeutar
+	boolean printed0286 = false;
 	public int execute(InstructionSet ins) {
 		//log
-		if(cont%1000==0) {
-			//System.out.println(cont);
+		if(pc == 0x0286 && !printed0286) {
+			System.out.println(String.format("DUMP 0286: %02X %02X %02X %02X %02X", mmu.readByte(0x0286)&0xFF, mmu.readByte(0x0287)&0xFF, mmu.readByte(0x0288)&0xFF, mmu.readByte(0x0289)&0xFF, mmu.readByte(0x028A)&0xFF));
+			printed0286 = true;
+		}
+		if(cont%100000==0) {
+			System.out.println(String.format("Inst count: %d - LATE PC: %04X LY: %d IE: %02X IF: %02X halted: %b", cont, pc, mmu.readByte(0xFF44)&0xFF, mmu.readByte(0xFFFF)&0xFF, mmu.readByte(0xFF0F)&0xFF, halted));
 		}
 		cont++;
 		log = this.toString();
@@ -389,6 +394,16 @@ public class Cpu {
 		this.setL(0x4D);
 		this.setSp(0xFFFE); 
 		this.setPc(0x0100);
+ 		mmu.writeByte(0xFF40, 0x91);
+		mmu.writeByte(0xFF42, 0x00);
+		mmu.writeByte(0xFF43, 0x00);
+		mmu.writeByte(0xFF45, 0x00);
+		mmu.writeByte(0xFF47, 0xFC);
+		mmu.writeByte(0xFF48, 0xFF);
+		mmu.writeByte(0xFF49, 0xFF);
+		mmu.writeByte(0xFF4A, 0x00);
+		mmu.writeByte(0xFF4B, 0x00);
+		mmu.writeByte(0xFFFF, 0x00);
 	}
 	
 	
