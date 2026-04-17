@@ -58,6 +58,7 @@ public class InterruptionManager {
 				setIF((getIF() & ~flag) & 0xFF);
 				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
 				cpu.pushPC();
+				//System.out.println("INT " + i + " sp: " + cpu.getSp());
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
 				// System.out.println("Interrupción manejada: " + i);

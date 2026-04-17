@@ -324,11 +324,21 @@ public class Cpu {
 	
 	//Funciones independientes
 	
+	private String[] trace = new String[20];
+	private int traceIndex = 0;
+
+	private int oobCount = 0;
+
 	//Función para ejeutar
+	boolean printed0286 = false;
 	public int execute(InstructionSet ins) {
 		//log
-		if(cont%1000==0) {
-			//System.out.println(cont);
+		if(pc == 0x0286 && !printed0286) {
+			System.out.println(String.format("DUMP 0286: %02X %02X %02X %02X %02X", mmu.readByte(0x0286)&0xFF, mmu.readByte(0x0287)&0xFF, mmu.readByte(0x0288)&0xFF, mmu.readByte(0x0289)&0xFF, mmu.readByte(0x028A)&0xFF));
+			printed0286 = true;
+		}
+		if(cont%100000==0) {
+			System.out.println(String.format("Inst count: %d - LATE PC: %04X LY: %d IE: %02X IF: %02X halted: %b", cont, pc, mmu.readByte(0xFF44)&0xFF, mmu.readByte(0xFFFF)&0xFF, mmu.readByte(0xFF0F)&0xFF, halted));
 		}
 		cont++;
 		log = this.toString();
@@ -346,8 +356,21 @@ public class Cpu {
 		}
 		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
-		if(pc>=0x8000 && (pc<0xC000 || pc>0xDFFF)) {
-			System.out.println("pc out of ROM range: ");
+		trace[traceIndex] = String.format("PC: %04X, Opcode: %02X", pc - 1, op);
+		traceIndex = (traceIndex + 1) % trace.length;
+		if((pc>=0x8000 && pc<0xA000) || (pc>=0xC000 && pc<0xC000) || (pc>0xDFFF && pc<0xFF80)) {
+			oobCount++;
+			if (oobCount == 1) {
+				System.out.println("FATAL: PC out of valid executable range! PC: " + String.format("%04X", pc));
+				System.out.println("Last 20 instructions:");
+				for (int i = 0; i < trace.length; i++) {
+					int idx = (traceIndex + i) % trace.length;
+					if (trace[idx] != null) {
+						System.out.println(trace[idx]);
+					}
+				}
+				System.exit(1);
+			}
 		}
 		if(instruction==null) {
 			System.out.println("Instruction is null on pc = " + (this.pc-1));
@@ -371,6 +394,16 @@ public class Cpu {
 		this.setL(0x4D);
 		this.setSp(0xFFFE); 
 		this.setPc(0x0100);
+ 		mmu.writeByte(0xFF40, 0x91);
+		mmu.writeByte(0xFF42, 0x00);
+		mmu.writeByte(0xFF43, 0x00);
+		mmu.writeByte(0xFF45, 0x00);
+		mmu.writeByte(0xFF47, 0xFC);
+		mmu.writeByte(0xFF48, 0xFF);
+		mmu.writeByte(0xFF49, 0xFF);
+		mmu.writeByte(0xFF4A, 0x00);
+		mmu.writeByte(0xFF4B, 0x00);
+		mmu.writeByte(0xFFFF, 0x00);
 	}
 	
 	
