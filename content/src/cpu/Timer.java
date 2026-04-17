@@ -26,6 +26,13 @@ public class Timer {
 	}
 	
 	
+	public void resetInternalCounters() {
+		divCont = 0;
+		timerCont = 0;
+		TIMAOverflow = false;
+		TIMADelayCounter = 0;
+	}
+	
 	//Esta función es llamada en cada instrucción para simular los ciclos que tardaría
 	public void step(int cycles) {
 		//DIV aumenta cada 256 ciclos
@@ -53,6 +60,9 @@ public class Timer {
 					setTIMA((getTIMA()+1)&0xFF);
 				}
 			}
+		} else {
+			TIMAOverflow = false;
+			TIMADelayCounter = 0;
 		}
 		
 		if (TIMAOverflow) {
@@ -71,7 +81,7 @@ public class Timer {
 	}
 
 	private void setDIV(int value){
-		mmu.writeByte(0xFF04, value);
+		mmu.forceWriteByte(0xFF04, value);
 	}
 
 	private int getTIMA(){

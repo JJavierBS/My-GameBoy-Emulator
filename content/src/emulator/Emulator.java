@@ -33,6 +33,7 @@ public class Emulator {
 		}
 		iM = new InterruptionManager(mmu);
 		timer = new Timer(iM,mmu);
+		mmu.setTimer(timer);
 		cpu = new Cpu(mmu,timer,iM);
 		cpu.inicializateRegisters();
 		instructionSet = new InstructionSet();
