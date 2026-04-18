@@ -40,6 +40,10 @@ public class Emulator {
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
 		gpuDebugger = new GpuDebugger(mmu);
+		
+		Joypad joypad = new Joypad(iM);
+		mmu.setJoypad(joypad);
+		gpuD.getFrame().addKeyListener(joypad);
 	}
 
 	public Cpu getCpu() {

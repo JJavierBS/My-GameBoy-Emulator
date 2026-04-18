@@ -10,6 +10,8 @@ public class GpuDisplay extends JPanel{
 	private final Gpu gpu;
 	private final BufferedImage screen;
 	
+	private final JFrame frame;
+	
 	public GpuDisplay(Gpu gpu) {
 		super();
 		this.gpu=gpu;
@@ -17,7 +19,7 @@ public class GpuDisplay extends JPanel{
 		this.screen = new BufferedImage(160,144,BufferedImage.TYPE_INT_RGB);
 
 		this.setPreferredSize(new Dimension(160*SCALE, 144*SCALE));
-		JFrame frame = new JFrame("My Game Boy emulator");
+		frame = new JFrame("My Game Boy emulator");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.add(this);
@@ -25,6 +27,10 @@ public class GpuDisplay extends JPanel{
 		frame.setVisible(true);
 
 		new Timer(1000/FPS, e -> repaint()).start(); //Este timer es de swing, no del emulador
+	}
+
+	public JFrame getFrame() {
+		return this.frame;
 	}
 	
 	@Override

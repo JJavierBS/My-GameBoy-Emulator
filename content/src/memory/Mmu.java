@@ -11,9 +11,14 @@ public class Mmu {
 	int romBank = 1;
 	boolean isMBC1 = false;
 	cpu.Timer timer;
+	emulator.Joypad joypad;
 	
 	public void setTimer(cpu.Timer timer) {
 		this.timer = timer;
+	}
+	
+	public void setJoypad(emulator.Joypad joypad) {
+		this.joypad = joypad;
 	}
 	
 	public Mmu() {
@@ -27,6 +32,9 @@ public class Mmu {
 	public byte readByte(int addr) {
 		addr &= 0xFFFF;
 		if (addr == 0xFF00) {
+			if (joypad != null) {
+				return (byte) joypad.readByte();
+			}
 			return (byte)((memory[0xFF00] & 0x30) | 0x0F);
 		}
 		addr = addr & 0xFFFF;
@@ -55,6 +63,13 @@ public class Mmu {
 	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr &= 0xFFFF;
+		if (addr == 0xFF00) {
+			if (joypad != null) {
+				joypad.writeByte(value);
+			}
+			memory[0xFF00] = (byte) ((value & 0x30) | (memory[0xFF00] & 0xCF));
+			return;
+		}
 		if (addr < 0x8000) {
 			if (isMBC1 && addr >= 0x2000 && addr < 0x4000) {
 				romBank = value & 0x1F;
