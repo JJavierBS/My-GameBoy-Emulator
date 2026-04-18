@@ -10,6 +10,10 @@ import gpu.GpuDisplay;
 import java.io.File;
 import java.io.IOException;
 import memory.Mmu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JFrame;
 
 public class Emulator {
 	private static final int DEFAULT_CYCLES_WHEN_HALTED = 4;
@@ -25,10 +29,9 @@ public class Emulator {
 	public Emulator(String romPath) {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File(romPath)); //Cargamos la rom
+			mmu.loadROM(new File(romPath)); 
 		}
 		catch (IOException e){
-			System.out.println("No se ha podido cargar la ROM corréctamente");
 			System.exit(1);
 		}
 		iM = new InterruptionManager(mmu);
@@ -43,50 +46,52 @@ public class Emulator {
 		
 		Joypad joypad = new Joypad(iM);
 		mmu.setJoypad(joypad);
-		gpuD.getFrame().addKeyListener(joypad);
+		
+		JFrame mainFrame = gpuD.getFrame();
+		mainFrame.addKeyListener(joypad);
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenu optionsMenu = new JMenu("Opciones");
+		
+		JMenuItem controlsItem = new JMenuItem("Controles...");
+		controlsItem.addActionListener(e -> {
+			ConfigWindow dialog = new ConfigWindow(mainFrame, joypad);
+			dialog.setVisible(true);
+		});
+		
+		JMenuItem fullscreenItem = new JMenuItem("Pantalla Completa (Toggle)");
+		fullscreenItem.addActionListener(e -> {
+			gpuD.toggleFullscreen();
+		});
+		
+		optionsMenu.add(controlsItem);
+		optionsMenu.add(fullscreenItem);
+		
+		menuBar.add(optionsMenu);
+		mainFrame.setJMenuBar(menuBar);
+		mainFrame.pack(); 
 	}
 
-	public Cpu getCpu() {
-		return cpu;
-	}
+	public Cpu getCpu() { return cpu; }
+	public Mmu getMmu() { return mmu; }
+	public InstructionSet getInstructionSet() { return instructionSet; }
+	public Timer getTimer() { return timer; }
+	public InterruptionManager getInterruptionManager(){ return iM; }
+	public GpuDisplay getGpuDisplay() { return this.gpuD; }
 
-	public Mmu getMmu() {
-		return mmu;
-	}
-	
-	public InstructionSet getInstructionSet() {
-		return instructionSet;
-	}
-	
-	public Timer getTimer() {
-		return timer;
-	}
-	
-	public InterruptionManager getInterruptionManager(){
-		return iM;
-	}
-	
-	public GpuDisplay getGpuDisplay() {
-		return this.gpuD;
-	}
-
-	
-	//Función principal que se encarga de ejecutar las instrucciones de la ROM
 	public void run() {
 		boolean skipInterruptThisCycle = false;
 		while(true) {
 			int cycles;
 			if(!cpu.isHalted() && !cpu.isStop()) {
 				cycles = cpu.execute(instructionSet);
-			}
-			else{
+			} else {
 				cycles = DEFAULT_CYCLES_WHEN_HALTED;
 			}
 			int interruptCycles = 0;
 			if(skipInterruptThisCycle){
 				skipInterruptThisCycle = false;
-			}
-			else{
+			} else {
 				if(iM.handleInterrupt(cpu)) {
 					interruptCycles = 5; 
 				}
@@ -96,36 +101,27 @@ public class Emulator {
 			if(cpu.isPendingIME()) {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
-				skipInterruptThisCycle = true; // Evitar interrupciones en este ciclo
+				skipInterruptThisCycle = true; 
 			}
-			//cpu.volcarAFichero(cpu.log);
 		}
 	}
 	
-	
-	//Función para hacer tests cargando bytes concretos en zonas de memoria arbitrarias
 	public void loadTest() {
 		for (int tile = 0; tile < 256; tile++) {
 		    int baseAddr = 0x8000 + tile * 16;
 		    for (int row = 0; row < 8; row++) {
-		        // Patrón simple: líneas diagonales
 		        byte low = (byte)(0b10101010 >> (tile % 8));
 		        byte high = (byte)(0b01010101 << (tile % 8));
 		        mmu.writeByte(baseAddr + row * 2, low);
 		        mmu.writeByte(baseAddr + row * 2 + 1, high);
 		    }
 		}
-		// Tile map: 32x32 = 1024 bytes
 		for (int i = 0; i < 1024; i++) {
-		    mmu.writeByte(0x9800 + i, (byte)(i % 256)); // cada tile ID del 0 al 255
+		    mmu.writeByte(0x9800 + i, (byte)(i % 256)); 
 		}
-		mmu.writeByte(0xFF40, (byte)10010001); // LCD on, bg on, tilemap at 0x9800, tiledata at 0x8000
-		mmu.writeByte(0xFF42, (byte)0); // SCY = 0
-		mmu.writeByte(0xFF43, (byte)0); // SCX = 0
-		mmu.writeByte(0xFF47, (byte)0b11100100); // Paleta BG: blanco, claro, oscuro, negro
-
+		mmu.writeByte(0xFF40, (byte)10010001); 
+		mmu.writeByte(0xFF42, (byte)0); 
+		mmu.writeByte(0xFF43, (byte)0); 
+		mmu.writeByte(0xFF47, (byte)0b11100100); 
 	}
-	
-	
-	
 }
