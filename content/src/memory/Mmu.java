@@ -19,6 +19,7 @@ public class Mmu {
 	boolean romBankingMode = true;
 	cpu.Timer timer;
 	emulator.Joypad joypad;
+	apu.Apu apu;
 	
 	public void setTimer(cpu.Timer timer) {
 		this.timer = timer;
@@ -26,6 +27,10 @@ public class Mmu {
 	
 	public void setJoypad(emulator.Joypad joypad) {
 		this.joypad = joypad;
+	}
+
+	public void setApu(apu.Apu apu) {
+		this.apu = apu;
 	}
 	
 	public Mmu() {
@@ -43,6 +48,9 @@ public class Mmu {
 				return (byte) joypad.readByte();
 			}
 			return (byte)((memory[0xFF00] & 0x30) | 0x0F);
+		}
+		if (addr >= 0xFF10 && addr <= 0xFF3F) {
+			if (apu != null) return apu.readRegister(addr);
 		}
 		addr = addr & 0xFFFF;
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
@@ -85,6 +93,11 @@ public class Mmu {
 				joypad.writeByte(value);
 			}
 			memory[0xFF00] = (byte) ((value & 0x30) | (memory[0xFF00] & 0xCF));
+			return;
+		}
+		if (addr >= 0xFF10 && addr <= 0xFF3F) {
+			if (apu != null) apu.writeRegister(addr, value);
+			memory[addr] = (byte)(value & 0xFF);
 			return;
 		}
 		if (addr < 0x8000) {

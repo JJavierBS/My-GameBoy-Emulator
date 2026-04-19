@@ -1,0 +1,12 @@
+--- src/apu/Apu.java
++++ src/apu/Apu.java
+@@ -239,6 +239,9 @@
+         
+         if (bufferIndex >= buffer.length) {
+             if (line != null && line.isRunning()) {
++                if (Math.random() < 0.05) {
++                    System.out.println("Writing audio buffer... Bytes 0-3: " + buffer[0] + "," + buffer[1] + "," + buffer[2] + "," + buffer[3] + " Is running: " + line.isRunning());
++                }
+                 line.write(buffer, 0, buffer.length);
+             }
+             bufferIndex = 0;

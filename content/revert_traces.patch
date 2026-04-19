@@ -1,0 +1,71 @@
+--- src/apu/Apu.java
++++ src/apu/Apu.java
+@@ -145,7 +145,6 @@
+         int reg = addr - 0xFF10;
+         registers[reg] = value;
+         // Handle trigger events
+-        if (addr == 0xFF12) System.out.println("WRITE NR12: " + String.format("%02X", value));
+         if (addr == 0xFF14 && (value & 0x80) != 0) { // Ch1 trigger
+             int freq = registers[0xFF13 - 0xFF10] | ((registers[0xFF14 - 0xFF10] & 0x07) << 8);
+             ch1Timer = (2048 - freq) * 4;
+@@ -165,7 +164,6 @@
+         int rightFinal = 0;
+ 
+         // If sound is on (NR52 bit 7), process channels
+-        if (Math.random() < 0.0001) System.out.println("NR52: " + String.format("%02X", registers[0xFF26 - 0xFF10]) + " NR50: " + String.format("%02X", registers[0xFF24 - 0xFF10]) + " NR51: " + String.format("%02X", registers[0xFF25 - 0xFF10]));
+         if ((registers[0xFF26 - 0xFF10] & 0x80) != 0) {
+             // Channel 1
+             int freq1 = registers[0xFF13 - 0xFF10] | ((registers[0xFF14 - 0xFF10] & 0x07) << 8);
+@@ -176,7 +174,6 @@
+             }
+             int ch1Duty = (registers[0xFF11 - 0xFF10] >> 6) & 0x03;
+             int ch1Vol = (registers[0xFF12 - 0xFF10] >> 4) & 0x0F;
+-            if (Math.random() < 0.0001) System.out.println("Ch1 Vol: " + ch1Vol + " Duty: " + ch1Duty);
+             int sample1 = DUTY_CYCLES[ch1Duty][ch1DutyStep] * ch1Vol;
+     
+             // Channel 2
+@@ -211,9 +208,6 @@
+             // Scale to 16-bit: multiply by 80 to leave headroom.
+             leftFinal = leftOut * leftVol * 80;
+             rightFinal = rightOut * rightVol * 80;
+-            if (leftFinal > 0) {
+-                // System.out.println("Audio generated: " + leftFinal);
+-            }
+         }
+ 
+         // DC Blocker (High-pass filter) to remove the DC offset dynamically
+--- src/cpu/Cpu.java
++++ src/cpu/Cpu.java
+@@ -357,7 +357,6 @@
+ 		}
+ 		Instruction instruction = ins.get(op);
+ 		trace[traceIndex] = "PC: " + String.format("%04X", pc - 1) + ", Opcode: " + String.format("%02X", op);
+-		if (cont % 10000 == 0) System.out.println("PC: " + String.format("%04X", pc - 1));
+ 		traceIndex = (traceIndex + 1) % trace.length;
+ 		if((pc>=0x8000 && pc<0xA000) || (pc>0xDFFF && pc<0xFF80)) {
+ 			oobCount++;
+--- src/emulator/Emulator.java
++++ src/emulator/Emulator.java
+@@ -81,9 +81,6 @@
+ 	public GpuDisplay getGpuDisplay() { return this.gpuD; }
+ 
+ 	public void run() {
+-        long startTime = System.currentTimeMillis();
+-        int totalCycles = 0;
+-
+ 		boolean skipInterruptThisCycle = false;
+ 		while(true) {
+ 			int cycles;
+@@ -102,12 +99,6 @@
+ 			timer.step(cycles + interruptCycles);
+ 			gpu.step(cycles + interruptCycles + cpu.consumeExtraGpuCycles());
+ 			apu.step(cycles + interruptCycles);
+-            totalCycles += cycles + interruptCycles;
+-            if (totalCycles > 419430) { // 10% of a second
+-                System.out.println("10% of GB second took: " + (System.currentTimeMillis() - startTime) + "ms");
+-                startTime = System.currentTimeMillis();
+-                totalCycles = 0;
+-            }
+ 			if(cpu.isPendingIME()) {
+ 				iM.setIME(true);
+ 				cpu.setPendingIME(false);
