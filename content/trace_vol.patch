@@ -1,8 +1,0 @@
---- src/apu/Apu.java
-+++ src/apu/Apu.java
-@@ -176,6 +176,7 @@
-             }
-             int ch1Duty = (registers[0xFF11 - 0xFF10] >> 6) & 0x03;
-             int ch1Vol = (registers[0xFF12 - 0xFF10] >> 4) & 0x0F;
-+            if (Math.random() < 0.0001) System.out.println("Ch1 Vol: " + ch1Vol + " Duty: " + ch1Duty);
-             int sample1 = DUTY_CYCLES[ch1Duty][ch1DutyStep] * ch1Vol;

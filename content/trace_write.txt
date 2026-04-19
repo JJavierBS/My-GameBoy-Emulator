@@ -1,9 +1,0 @@
-Ch1 Vol: 0 Duty: 0
-Ch1 Vol: 0 Duty: 0
-Ch1 Vol: 0 Duty: 0
-Ch1 Vol: 0 Duty: 0
-NR52: 80 NR50: 77 NR51: FF
-NR52: 80 NR50: 77 NR51: FF
-Ch1 Vol: 0 Duty: 0
-NR52: 80 NR50: 77 NR51: FF
-NR52: 80 NR50: 77 NR51: FF
