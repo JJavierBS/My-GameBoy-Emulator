@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class Mmu {
-	//Memoria de la mmu
 	byte[] memory;
 	byte[] romData;
 	byte[] ramData;
@@ -41,9 +40,7 @@ public class Mmu {
 		this.memory = new byte[0x10000]; //64KB
 	}
 	
-	//funciones de lectura/escritura
 	
-	//Leer byte
 	public byte readByte(int addr) {
 		addr &= 0xFFFF;
 		if (addr == 0xFF00) {
@@ -56,7 +53,7 @@ public class Mmu {
 			if (apu != null) return apu.readRegister(addr);
 		}
 		addr = addr & 0xFFFF;
-		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
+		if(addr>=0xE000 && addr<=0xFDFF){
 			addr -= 0x2000; 
 		}
 		if (addr < 0x4000) {
@@ -88,7 +85,6 @@ public class Mmu {
 		memory[addr & 0xFFFF] = (byte)(value & 0xFF);
 	}
 	
-	//Escribir byte
 	public void writeByte(int addr, int value) {
 		addr &= 0xFFFF;
 		if (addr == 0xFF00) {
@@ -160,15 +156,15 @@ public class Mmu {
 		}
 		if(addr==0xFF46){
 			int sourceHigh = value & 0xFF;
-			int sourceAddress = sourceHigh << 8; //DMA -> transferencia de sprites
+			int sourceAddress = sourceHigh << 8;
 
 			for(int i = 0; i<160; i++){
 				byte data = readByte(sourceAddress + i);
 				writeByte(0xFE00 + i, data);
 			}
-			return; //No se escribe en la memoria, solo se hace la transferencia
+			return;
 		}
-		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
+		if(addr>=0xE000 && addr<=0xFDFF){
 			addr -= 0x2000; 
 		}
 		if (addr >= 0xA000 && addr < 0xC000) {
@@ -185,14 +181,12 @@ public class Mmu {
 		memory[addr] = (byte)(value & 0xFF);
 	}
 	
-	//Leer word
 	public int readWord(int addr) {
 		int lowByte = readByte(addr) & 0xFF;
 		int highByte = readByte((addr + 1) & 0xFFFF) & 0xFF;
 		return (highByte << 8) | lowByte;
 	}
 	
-	//Escribir word
 	public void writeWord(int addr, int value) {
 		writeByte(addr, value & 0xFF);
 		writeByte((addr + 1) & 0xFFFF, (value >> 8) & 0xFF);
@@ -204,7 +198,6 @@ public class Mmu {
 		}
 	}
 	
-	//funciones de carga
 	public void loadROM(byte[] rom, int index) {
 		for(byte b : rom) {
 			if (index < memory.length) memory[index++] = b;
