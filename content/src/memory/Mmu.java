@@ -2,7 +2,9 @@ package memory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class Mmu {
 	//Memoria de la mmu
@@ -17,6 +19,7 @@ public class Mmu {
 	boolean isMBC = false;
 	boolean ramEnabled = false;
 	boolean romBankingMode = true;
+	File saveFile;
 	cpu.Timer timer;
 	emulator.Joypad joypad;
 	apu.Apu apu;
@@ -103,7 +106,15 @@ public class Mmu {
 		if (addr < 0x8000) {
 			if (isMBC) {
 				if (addr < 0x2000) {
+					boolean wasEnabled = ramEnabled;
 					ramEnabled = ((value & 0x0F) == 0x0A);
+					if (wasEnabled && !ramEnabled) {
+						try {
+							saveRAM();
+						} catch (IOException e) {
+							throw new RuntimeException("Failed to save RAM during bank switch", e);
+						}
+					}
 				} else if (addr >= 0x2000 && addr < 0x3000) {
 					if (isMBC5) {
 						romBank = (romBank & 0x100) | (value & 0xFF);
@@ -187,6 +198,12 @@ public class Mmu {
 		writeByte((addr + 1) & 0xFFFF, (value >> 8) & 0xFF);
 	}
 	
+	public void saveRAM() throws IOException {
+		if (saveFile != null && ramData != null) {
+			Files.write(saveFile.toPath(), ramData);
+		}
+	}
+	
 	//funciones de carga
 	public void loadROM(byte[] rom, int index) {
 		for(byte b : rom) {
@@ -195,6 +212,12 @@ public class Mmu {
 	};
 	
 	public void loadROM(File romFile) throws IOException{
+		String romPath = romFile.getAbsolutePath();
+		String romName = romFile.getName();
+		int dotIndex = romName.lastIndexOf('.');
+		String savePath = (dotIndex == -1) ? romPath + ".sav" : romPath.substring(0, romPath.length() - (romName.length() - dotIndex)) + ".sav";
+		saveFile = new File(savePath);
+
 		try (FileInputStream fis = new FileInputStream(romFile)) {
 			romData = fis.readAllBytes();
 			
@@ -222,7 +245,32 @@ public class Mmu {
 					isMBC = true;
 				}
 				if (isMBC) {
-					ramData = new byte[0x8000]; // 32KB RAM
+					int ramSizeCode = romData[0x149] & 0xFF;
+					int ramSize = 0x8000; // default 32KB
+					switch (ramSizeCode) {
+						case 0: ramSize = 0; break;
+						case 1: ramSize = 2048; break; // 2KB
+						case 2: ramSize = 8192; break; // 8KB
+						case 3: ramSize = 32768; break; // 32KB
+						case 4: ramSize = 131072; break; // 128KB
+						case 5: ramSize = 65536; break; // 64KB
+					}
+					if (ramSize > 0) {
+						ramData = new byte[ramSize];
+						if (saveFile.exists()) {
+							byte[] saved = Files.readAllBytes(saveFile.toPath());
+							System.arraycopy(saved, 0, ramData, 0, Math.min(saved.length, ramData.length));
+						}
+						Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+							if (ramData != null) {
+								try {
+									saveRAM();
+								} catch (IOException e) {
+									throw new RuntimeException("Failed to save RAM on shutdown", e);
+								}
+							}
+						}));
+					}
 				}
 			}
 			

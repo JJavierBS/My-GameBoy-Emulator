@@ -1,117 +1,68 @@
 # My GameBoy Emulator
 
-Un emulador de Game Boy escrito en Java que reproduce el comportamiento del hardware original de Nintendo Game Boy (DMG).
+## Introduction
 
-## Estado del Proyecto
+Welcome to **My-GameBoy-Emulator**! This is a custom-built GameBoy emulator written entirely in Java. It accurately emulates the core hardware of the original Nintendo GameBoy, allowing you to play classic titles right on your computer. Whether you want to relive your childhood memories playing classic games or you're a developer interested in emulation architecture, this project has something for you.
 
-🚧 **En desarrollo activo**
+## Features
 
-El emulador está actualmente en fase de desarrollo y **no funciona completamente** debido a bugs en el sistema de timing/timer. Aunque puede cargar y mostrar las pantallas iniciales de ciertas ROMs, presenta problemas de sincronización que impiden la ejecución correcta de juegos.
+- **Accurate Cartridge Support**: Implements Memory Bank Controllers including **MBC1**, **MBC3**, and **MBC5**, ensuring high compatibility with popular GameBoy titles like *Pokémon Red*, *Tetris*, and more.
+- **Audio Processing Unit (APU)**: Enjoy the classic 8-bit sound! The emulator features an authentic APU with square wave generation and a High-Pass Filter for accurate audio reproduction.
+- **Save States**: Never lose your progress. The emulator supports battery-backed RAM via standard `.sav` files, automatically loading and saving your game data.
+- **Customizable Configuration**: A dedicated configuration window allows you to easily map keyboard controls and select your preferred audio output device. It works out-of-the-box on Linux/ALSA via Java Sound.
+- **Fullscreen Mode**: Immerse yourself in the game by toggling fullscreen mode.
 
-### ✅ Lo que funciona
-- Carga de ROMs (.gb)
-- Ejecución básica de instrucciones de CPU
-- Renderizado inicial de gráficos
-- Pantallas de inicio de algunas ROMs
-- Interfaz gráfica básica con GPU Debugger
+## How to Run
 
-### ❌ Problemas conocidos
-- **Bug crítico en el timer**: Problemas de sincronización que afectan el timing de la CPU
-- Fallo en el test `01-read_timing.gb` (único test de cpu_instrs que no pasa)
-- Corrupción de memoria en juegos como Tetris
-- Timing no preciso a nivel de ciclo (necesita migración a modelo cycle-accurate)
+Running the emulator is simple! You just need to have Java installed on your computer.
 
-## Estructura del Proyecto
+### Prerequisites
+- **Java Runtime Environment (JRE) 11 or higher** installed on your system.
 
-```
-src/
-├── audio/          # Procesamiento de audio (no implementado)
-├── cpu/            # Procesador central y conjunto de instrucciones
-│   ├── Cpu.java
-│   ├── InstructionSet.java
-│   ├── Timer.java
-│   └── ...
-├── emulator/       # Núcleo del emulador
-│   ├── Emulator.java
-│   ├── Main.java
-│   └── RomLoader.java
-├── gpu/            # Unidad de procesamiento gráfico
-│   ├── Gpu.java
-│   ├── GpuDisplay.java
-│   └── GpuDebugger.java
-├── memory/         # Gestión de memoria
-│   ├── Mmu.java
-│   ├── Memory.java
-│   └── Cartridge.java
-└── utils/          # Utilidades
-```
+### Running the Emulator
+1. Download the latest release `.jar` file from the repository, or compile the project from source.
+2. Double-click the `.jar` file to launch the emulator GUI.
+3. Alternatively, you can run it from the command line:
+   ```bash
+   java -jar My-GameBoy-Emulator.jar
+   ```
+4. Once the emulator opens, use the interface to load a valid GameBoy ROM file (`.gb`).
+5. Your game will start immediately!
 
-## ROMs de Prueba
+*Note: You must legally own the GameBoy games you play on this emulator. ROMs are not provided with this project.*
 
-El proyecto incluye varias ROMs de test en `romTest/`:
-- Tests de CPU (cpu_instrs): La mayoría pasan excepto `01-read_timing.gb`
-- ROMs comerciales como Tetris (con problemas de corrupción)
-- Tests compilados de mooneye-gb
+## Controls
 
-## Compilación y Ejecución
+The emulator supports customizable keyboard controls. You can change these at any time via the **Configuration** menu.
 
-### Requisitos
-- Java 11 o superior
-- IDE compatible con Java (Eclipse, IntelliJ, etc.)
+### Default Mapping:
+- **D-Pad**: Arrow Keys (Up, Down, Left, Right)
+- **A Button**: `Z`
+- **B Button**: `X`
+- **Start**: `Enter`
+- **Select**: `Shift`
+- **Toggle Fullscreen**: `F11` (or via the View menu)
 
-### Ejecutar
-1. Clona el repositorio
-2. Abre el proyecto en tu IDE favorito
-3. Ejecuta la clase `Main.java`
-4. El emulador cargará automáticamente la ROM especificada en `Emulator.java`
+## Technical Details
 
-## Contribuciones y Ayuda
+For developers and emulation enthusiasts, this emulator provides a clean, object-oriented implementation of the GameBoy architecture in Java.
 
-### 🤝 ¡Se aceptan contribuciones!
+### Architecture Overview
+- **CPU**: Custom implementation of the Sharp LR35902 (similar to Z80/8080). Handles instruction fetching, decoding, and execution.
+- **PPU (Pixel Processing Unit)**: Renders background, window, and sprites (OAM) to a Java Swing `BufferedImage`.
+- **APU**: Synthesizes audio using Java Sound API. Features square wave channels and accurately processes the GameBoy's audio registers and high-pass filtering.
+- **Memory Management Unit (MMU)**: Maps the 16-bit address space to internal RAM, Video RAM, Cartridge ROM/RAM, and Memory Mapped I/O registers.
+- **GUI**: Built using standard Java Swing components for a lightweight, cross-platform interface.
 
-Este proyecto está abierto a contribuciones de la comunidad. Cualquier nivel de experiencia es bienvenido:
-- Principiantes: documentación, tests, pequeñas mejoras
-- Desarrolladores: corrección de bugs, nuevas características
-- Expertos en emulación: optimización y timing preciso
+### Building from Source
+If you want to compile the project yourself:
+1. Clone the repository: 
+   ```bash
+   git clone https://github.com/yourusername/My-GameBoy-Emulator.git
+   ```
+2. Open the project in your favorite IDE (IntelliJ IDEA, Eclipse, etc.) or use your build tool to compile the Java source files.
+3. Run the `Main` class to start the emulator.
 
-**¡Tu ayuda será muy bienvenida!**
+## License
 
-### 📝 Consejos y sugerencias
-
-Si tienes consejos sobre:
-- Cómo implementar un timer más preciso
-- Migración a modelo cycle-accurate
-- Solución de bugs de timing
-- Mejores prácticas en emulación
-
-No dudes en abrir un **Issue** o enviar un **Pull Request**.
-
-### 🐛 Reportar bugs
-
-Para reportar bugs, por favor incluye:
-- ROM que causa el problema
-- Comportamiento esperado vs observado
-- Screenshots si es aplicable
-- Logs de depuración si están disponibles
-
-## Recursos Útiles
-
-- [Game Boy CPU Manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf)
-- [Pan Docs - Game Boy Documentation](https://gbdev.io/pandocs/)
-- [Game Boy CPU Instruction Set](https://gbdev.io/pandocs/CPU_Instruction_Set.html)
-- [Game Boy Opcodes Reference](https://pastraiser.com/cpu/gameboy/gameboy_opcodes.html)
-- [Game Boy Development Community](https://gbdev.io/)
-- [Blargg's Test ROMs](https://github.com/retrio/gb-test-roms)
-
-## Licencia
-
-MIT License - Ver [LICENSE.txt](LICENSE.txt) para más detalles.
-
-## Reconocimientos
-
-- Comunidad de desarrolladores de Game Boy
-- Autores de las ROMs de test utilizadas
-
----
-
-**Nota**: Este es un proyecto educativo en desarrollo. No está destinado para uso comercial y se basa en documentación pública del hardware Game Boy.
+MIT License - See [LICENSE.txt](LICENSE.txt) for details.

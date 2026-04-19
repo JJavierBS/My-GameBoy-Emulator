@@ -162,8 +162,6 @@ public class Apu {
         }
     }
 
-    private int debugSampleCount = 0;
-
     private void generateSample() {
         int leftFinal = 0;
         int rightFinal = 0;
@@ -222,12 +220,7 @@ public class Apu {
         int filteredLeft = (int)(leftFinal - hpLeft);
         int filteredRight = (int)(rightFinal - hpRight);
         
-        if (debugSampleCount++ % 44100 == 0) {
-            boolean soundOn = (registers[0xFF26 - 0xFF10] & 0x80) != 0;
-            int ch1V = (registers[0xFF12 - 0xFF10] >> 4) & 0x0F;
-            int ch2V = (registers[0xFF17 - 0xFF10] >> 4) & 0x0F;
-            System.out.println("[APU DEBUG] ON: " + soundOn + ", Ch1Vol: " + ch1V + ", Ch2Vol: " + ch2V + ", leftFinal: " + leftFinal);
-        }
+
 
         pushSample(filteredLeft, filteredRight);
     }

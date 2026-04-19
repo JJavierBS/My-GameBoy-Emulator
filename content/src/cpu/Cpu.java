@@ -1,13 +1,9 @@
 package cpu;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import memory.Mmu;
 
 //Esta clase modela el comportamiento de la cpu
 public class Cpu {
 	//depuracion
-	public String log;
 	private int cont = 0;
 	//Registros de 8 bits
 	private int a, f, b, c, d, e, h, l; //Siendo f un marcador de flags y a un acumulador
@@ -322,21 +318,9 @@ public class Cpu {
 	
 	//Funciones independientes
 	
-	private String[] trace = new String[20000];
-	private int traceIndex = 0;
-
-	private int oobCount = 0;
-
 	//Función para ejeutar
-	boolean printed0286 = false;
 	public int execute(InstructionSet ins) {
-		//log
-		if(pc == 0x0286 && !printed0286) {
-			printed0286 = true;
-		}
 		cont++;
-		log = this.toString();
-		//endlog
 		if(this.stop || this.halted) return 0;
 		byte op;
 		if(!haltBug){
@@ -348,32 +332,8 @@ public class Cpu {
 			haltBug=false;
 		}
 		Instruction instruction = ins.get(op);
-		trace[traceIndex] = "PC: " + String.format("%04X", pc - 1) + ", Opcode: " + String.format("%02X", op);
-		traceIndex = (traceIndex + 1) % trace.length;
-		if((pc>=0x8000 && pc<0xA000) || (pc>0xDFFF && pc<0xFF80)) {
-			oobCount++;
-			if (oobCount == 1) {
-				System.out.println("EXITING OOB AT PC: " + String.format("%04X", pc - 1));
-				for (int i = 0; i < trace.length; i++) {
-					int idx = (traceIndex + i) % trace.length;
-					if (trace[idx] != null) {
-						System.out.println(trace[idx]);
-					}
-				}
-				System.out.println("EXITING OOB");
-				System.exit(1);
-			}
-		}
 		if(instruction==null) {
 			System.out.println("Unknown instruction " + String.format("%02X", op) + " at " + String.format("%04X", pc - 1));
-			for (int i = 0; i < trace.length; i++) {
-				int idx = (traceIndex + i) % trace.length;
-				if (trace[idx] != null) {
-					System.out.println(trace[idx]);
-				}
-				System.out.println("EXITING UNKNOWN");
-				System.exit(1);
-			}
 		}
 		int cycles = instruction.execute(this);
 
@@ -412,17 +372,5 @@ public class Cpu {
 				" SP:" + String.format("%04X", sp) + " PC:" + String.format("%04X", pc) + " PCMEM:" + String.format("%02X", mmu.readByte(pc)) + "," + String.format("%02X", mmu.readByte(pc+1)) + "," + String.format("%02X", mmu.readByte(pc+2)) + "," + String.format("%02X", mmu.readByte(pc+3));
 	}
 	
-	public void volcarAFichero(String log){
-		try {
-			File file = new File("log.txt");
-			FileWriter fw = new FileWriter(file, true); // true para append
-			fw.write(log);
-			fw.write("\n");
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 //A:00 F:11 B:22 C:33 D:44 E:55 H:66 L:77 SP:8888 PC:9999 PCMEM:AA,BB,CC,DD
 }
