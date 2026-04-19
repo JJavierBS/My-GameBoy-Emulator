@@ -8,8 +8,15 @@ public class Mmu {
 	//Memoria de la mmu
 	byte[] memory;
 	byte[] romData;
+	byte[] ramData;
 	int romBank = 1;
+	int ramBank = 0;
 	boolean isMBC1 = false;
+	boolean isMBC3 = false;
+	boolean isMBC5 = false;
+	boolean isMBC = false;
+	boolean ramEnabled = false;
+	boolean romBankingMode = true;
 	cpu.Timer timer;
 	emulator.Joypad joypad;
 	
@@ -47,7 +54,17 @@ public class Mmu {
 		} else if (addr >= 0x4000 && addr < 0x8000) {
 			if (romData != null) {
 				int offset = (romBank * 0x4000) + (addr - 0x4000);
-				if (offset < romData.length) return romData[offset];
+				if (offset < romData.length) {
+					return romData[offset];
+				} else {
+					return (byte)0xFF;
+				}
+			}
+			return memory[addr];
+		} else if (addr >= 0xA000 && addr < 0xC000) {
+			if (isMBC && ramEnabled && ramData != null) {
+				int offset = (ramBank * 0x2000) + (addr - 0xA000);
+				if (offset < ramData.length) return ramData[offset];
 			}
 			return memory[addr];
 		}
@@ -71,9 +88,45 @@ public class Mmu {
 			return;
 		}
 		if (addr < 0x8000) {
-			if (isMBC1 && addr >= 0x2000 && addr < 0x4000) {
-				romBank = value & 0x1F;
-				if (romBank == 0) romBank = 1;
+			if (isMBC) {
+				if (addr < 0x2000) {
+					ramEnabled = ((value & 0x0F) == 0x0A);
+				} else if (addr >= 0x2000 && addr < 0x3000) {
+					if (isMBC5) {
+						romBank = (romBank & 0x100) | (value & 0xFF);
+					} else {
+						int lower = value & (isMBC3 ? 0x7F : 0x1F);
+						if (lower == 0) lower = 1;
+						romBank = (romBank & 0xE0) | lower;
+					}
+				} else if (addr >= 0x3000 && addr < 0x4000) {
+					if (isMBC5) {
+						romBank = (romBank & 0xFF) | ((value & 0x01) << 8);
+					} else {
+						int lower = value & (isMBC3 ? 0x7F : 0x1F);
+						if (lower == 0) lower = 1;
+						romBank = (romBank & 0xE0) | lower;
+					}
+				} else if (addr >= 0x4000 && addr < 0x6000) {
+					if (!romBankingMode) {
+						ramBank = value & 0x03;
+						if (isMBC3 && value >= 0x08 && value <= 0x0C) {
+							// RTC registers (unimplemented, but allowed)
+							ramBank = value;
+						}
+					} else {
+						if (isMBC1) {
+							romBank = (romBank & 0x1F) | ((value & 0x03) << 5);
+						} else {
+							ramBank = value & 0x0F;
+						}
+					}
+				} else if (addr >= 0x6000 && addr < 0x8000) {
+					romBankingMode = (value & 0x01) == 0;
+					if (romBankingMode) {
+						ramBank = 0;
+					}
+				}
 			}
 			return; // ROM is read-only
 		}
@@ -93,6 +146,15 @@ public class Mmu {
 		}
 		if(addr>=0xE000 && addr<=0xFDFF){ //echo RAM
 			addr -= 0x2000; 
+		}
+		if (addr >= 0xA000 && addr < 0xC000) {
+			if (isMBC && ramEnabled && ramData != null) {
+				int offset = (ramBank * 0x2000) + (addr - 0xA000);
+				if (offset < ramData.length) {
+					ramData[offset] = (byte)(value & 0xFF);
+				}
+				return;
+			}
 		}
 		if (addr == 0xFF02 && value == 0x81) {
 		}
@@ -132,8 +194,22 @@ public class Mmu {
 			if (romData.length > 0x147) {
 				int cartType = romData[0x147] & 0xFF;
 				// MBC1
-				if (cartType == 1 || cartType == 2 || cartType == 3) {
+				if (cartType >= 1 && cartType <= 3) {
 					isMBC1 = true;
+					isMBC = true;
+				}
+				// MBC3
+				if (cartType >= 0x0F && cartType <= 0x13) {
+					isMBC3 = true;
+					isMBC = true;
+				}
+				// MBC5
+				if (cartType >= 0x19 && cartType <= 0x1E) {
+					isMBC5 = true;
+					isMBC = true;
+				}
+				if (isMBC) {
+					ramData = new byte[0x8000]; // 32KB RAM
 				}
 			}
 			

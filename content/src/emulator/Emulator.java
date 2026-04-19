@@ -32,6 +32,7 @@ public class Emulator {
 			mmu.loadROM(new File(romPath)); 
 		}
 		catch (IOException e){
+			e.printStackTrace();
 			System.exit(1);
 		}
 		iM = new InterruptionManager(mmu);

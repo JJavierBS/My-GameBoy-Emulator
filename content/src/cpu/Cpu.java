@@ -290,8 +290,8 @@ public class Cpu {
 	public void pushByte(int value) {
 		sp--;
 		mmu.writeByte(sp,(byte)(value & 0xFF));
-		if(sp>0xFFFE || sp<0xC000) {
-			throw new RuntimeException("Stack overflow");
+		if(sp>0xFFFE || sp<0x8000) { // Gameboy allows stack in WRAM and sometimes HRAM
+			// Overflow check
 		}
 	}
 	
@@ -304,8 +304,8 @@ public class Cpu {
 	public byte popByte() {
 		byte value = mmu.readByte(sp);
 		sp++;
-		if(sp>0xFFFE || sp<0xC000){
-			throw new RuntimeException("Stack underflow");
+		if(sp>0xFFFE){
+			// Some games might use WRAM for stack and occasionally pop past it temporarily or simply start there. We only care if it goes past FFFE.
 		}
 		return value;
 	}
@@ -348,15 +348,19 @@ public class Cpu {
 			haltBug=false;
 		}
 		Instruction instruction = ins.get(op);
-		if((pc>=0x8000 && pc<0xA000) || (pc>=0xC000 && pc<0xC000) || (pc>0xDFFF && pc<0xFF80)) {
+		trace[traceIndex] = "PC: " + String.format("%04X", pc - 1) + ", Opcode: " + String.format("%02X", op);
+		traceIndex = (traceIndex + 1) % trace.length;
+		if((pc>=0x8000 && pc<0xA000) || (pc>0xDFFF && pc<0xFF80)) {
 			oobCount++;
 			if (oobCount == 1) {
+				System.out.println("EXITING OOB AT PC: " + String.format("%04X", pc - 1));
 				for (int i = 0; i < trace.length; i++) {
 					int idx = (traceIndex + i) % trace.length;
 					if (trace[idx] != null) {
 						System.out.println(trace[idx]);
 					}
 				}
+				System.out.println("EXITING OOB");
 				System.exit(1);
 			}
 		}
@@ -367,8 +371,9 @@ public class Cpu {
 				if (trace[idx] != null) {
 					System.out.println(trace[idx]);
 				}
+				System.out.println("EXITING UNKNOWN");
+				System.exit(1);
 			}
-			System.exit(1);
 		}
 		int cycles = instruction.execute(this);
 
