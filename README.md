@@ -10,6 +10,11 @@
 
 Welcome to **jboy**! This is a custom-built GameBoy emulator written entirely in Java. It accurately emulates the core hardware of the original Nintendo GameBoy, allowing you to play classic titles right on your computer.
 
+### Screenshots
+![Pokemon Red](docs/PokemonRojo.png)
+![Super Mario Land](docs/SuperMarioLand.png)
+![Tetris](docs/Tetris.png)
+
 ## Features
 
 - **Accurate Cartridge Support**: Implements Memory Bank Controllers including **MBC1**, **MBC3**, and **MBC5**.
@@ -55,6 +60,11 @@ Running the emulator is simple! You just need to have Java installed on your com
 ## Introducción
 
 ¡Bienvenido a **jboy**! Este es un emulador de GameBoy desarrollado totalmente en Java. Emula con precisión el hardware original de la Nintendo GameBoy, permitiéndote jugar títulos clásicos en tu computadora.
+
+### Capturas de pantalla
+![Pokemon Rojo](docs/PokemonRojo.png)
+![Super Mario Land](docs/SuperMarioLand.png)
+![Tetris](docs/Tetris.png)
 
 ## Características
 
