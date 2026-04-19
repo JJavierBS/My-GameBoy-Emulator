@@ -27,11 +27,11 @@ public class Emulator {
 	private final GpuDisplay gpuD;
 	private final GpuDebugger gpuDebugger;
 	private final Apu apu;
-
+	
 	public Emulator(String romPath) {
 		mmu = new Mmu();
 		try {
-			mmu.loadROM(new File(romPath));
+			mmu.loadROM(new File(romPath)); 
 		}
 		catch (IOException e){
 			e.printStackTrace();
@@ -48,33 +48,33 @@ public class Emulator {
 		gpu = new Gpu(iM,mmu);
 		gpuD = new GpuDisplay(gpu);
 		gpuDebugger = new GpuDebugger(mmu);
-
+		
 		Joypad joypad = new Joypad(iM);
 		mmu.setJoypad(joypad);
-
+		
 		JFrame mainFrame = gpuD.getFrame();
 		mainFrame.addKeyListener(joypad);
-
+		
 		JMenuBar menuBar = new JMenuBar();
 		JMenu optionsMenu = new JMenu("Opciones");
-
+		
 		JMenuItem controlsItem = new JMenuItem("Opciones...");
 		controlsItem.addActionListener(e -> {
 			ConfigWindow dialog = new ConfigWindow(mainFrame, joypad, apu);
 			dialog.setVisible(true);
 		});
-
+		
 		JMenuItem fullscreenItem = new JMenuItem("Pantalla Completa (Toggle)");
 		fullscreenItem.addActionListener(e -> {
 			gpuD.toggleFullscreen();
 		});
-
+		
 		optionsMenu.add(controlsItem);
 		optionsMenu.add(fullscreenItem);
-
+		
 		menuBar.add(optionsMenu);
 		mainFrame.setJMenuBar(menuBar);
-		mainFrame.pack();
+		mainFrame.pack(); 
 	}
 
 	public Cpu getCpu() { return cpu; }
@@ -85,6 +85,9 @@ public class Emulator {
 	public GpuDisplay getGpuDisplay() { return this.gpuD; }
 
 	public void run() {
+        long startTime = System.currentTimeMillis();
+        int totalCycles = 0;
+
 		boolean skipInterruptThisCycle = false;
 		while(true) {
 			int cycles;
@@ -98,20 +101,26 @@ public class Emulator {
 				skipInterruptThisCycle = false;
 			} else {
 				if(iM.handleInterrupt(cpu)) {
-					interruptCycles = 5;
+					interruptCycles = 5; 
 				}
 			}
 			timer.step(cycles + interruptCycles);
 			gpu.step(cycles + interruptCycles + cpu.consumeExtraGpuCycles());
 			apu.step(cycles + interruptCycles);
+            totalCycles += cycles + interruptCycles;
+            if (totalCycles > 419430) { // 10% of a second
+                System.out.println("10% of GB second took: " + (System.currentTimeMillis() - startTime) + "ms");
+                startTime = System.currentTimeMillis();
+                totalCycles = 0;
+            }
 			if(cpu.isPendingIME()) {
 				iM.setIME(true);
 				cpu.setPendingIME(false);
-				skipInterruptThisCycle = true;
+				skipInterruptThisCycle = true; 
 			}
 		}
 	}
-
+	
 	public void loadTest() {
 		for (int tile = 0; tile < 256; tile++) {
 		    int baseAddr = 0x8000 + tile * 16;
@@ -123,11 +132,11 @@ public class Emulator {
 		    }
 		}
 		for (int i = 0; i < 1024; i++) {
-		    mmu.writeByte(0x9800 + i, (byte)(i % 256));
+		    mmu.writeByte(0x9800 + i, (byte)(i % 256)); 
 		}
-		mmu.writeByte(0xFF40, (byte)10010001);
-		mmu.writeByte(0xFF42, (byte)0);
-		mmu.writeByte(0xFF43, (byte)0);
-		mmu.writeByte(0xFF47, (byte)0b11100100);
+		mmu.writeByte(0xFF40, (byte)10010001); 
+		mmu.writeByte(0xFF42, (byte)0); 
+		mmu.writeByte(0xFF43, (byte)0); 
+		mmu.writeByte(0xFF47, (byte)0b11100100); 
 	}
 }

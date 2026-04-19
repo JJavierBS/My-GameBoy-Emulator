@@ -5,64 +5,48 @@ import memory.Mmu;
 public class InterruptionManager {
 	private final int[] INTERRUPTIONS = {1,2,4,8,16};
 	private final int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
-	//Indexación:
-	//0 -> Vblank
-	//1 -> LCD
-	//2 -> Timer
-	//3 -> Serial
-	//4 -> JoyPad
-	private boolean IME; //Permite o no las interrupciones en el sistema (Interrupt Master Enable)
+
+	private boolean IME;
 	private final Mmu mmu;
-	
-	
+
 	public InterruptionManager(Mmu mmu) {
 		super();
 		this.mmu = mmu;
 		IME=false;
 	}
-	
-	//Función que permite a otros módulos solicitar interrupciones
-	//Se comprueba después de la ejecución de cada instrucción**
+
 	public void requestInterrupt(int type) {
-		//System.out.println("Interrupción solicitada: " + type);
 		setIF(getIF() | INTERRUPTIONS[type]);
 	}
-	
-	
-	//Función para activar y desactivar interrupciones
+
 	public void setIME(boolean value) {
 		IME=value;
 	}
-	
-	//Función para realizar las interrupciones
-	//Es llamada después de cada instrucción del procesador
+
 	public boolean handleInterrupt(Cpu cpu) {
 		int interruptions = getIF() & getIE();
-		// Si hay interrupción pendiente y la CPU está en HALT, salir de HALT aunque IME=0
+
 		if(interruptions != 0 && cpu.isHalted()) {
 			cpu.setHalted(false);
 		}
-		//Lo mismo con stop
+
 		if(interruptions!=0 && cpu.isStop()) {
 			cpu.setStop(false);
 		}
 		if(!IME) {
-			return false; // las interrupciones están desactivadas
+			return false;
 		}
-		//System.out.println("Handeling interrupt");
-		if(interruptions == 0) return false; // Comprobar si hay alguna interrupción posible a ejecutar
+		if(interruptions == 0) return false;
 		for(int i=0; i<5; i++) {
 			int flag = INTERRUPTIONS[i];
-			if((interruptions & flag)!=0) { //Ejecutar ESA interrupción
-				//Quitamos esta interrupción pendiente
+			if((interruptions & flag)!=0) {
+
 				setIF((getIF() & ~flag) & 0xFF);
-				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
+				IME=false;
 				cpu.pushPC();
-				//System.out.println("INT " + i + " sp: " + cpu.getSp());
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
-				// System.out.println("Interrupción manejada: " + i);
-				cpu.setHalted(false); //La cpu deja el modo suspensión
+				cpu.setHalted(false);
 				return true;
 			}
 		}
@@ -88,9 +72,5 @@ public class InterruptionManager {
 	public boolean isIME() {
 		return IME;
 	}
-	
-	
-	
-	
-	
+
 }

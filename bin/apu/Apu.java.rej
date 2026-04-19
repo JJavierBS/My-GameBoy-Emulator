@@ -1,0 +1,11 @@
+--- Apu.java
++++ Apu.java
+@@ -239,7 +236,7 @@
+         
+         if (bufferIndex >= buffer.length) {
+             if (line != null && line.isRunning()) {
+-                if (line.available() >= buffer.length) line.write(buffer, 0, buffer.length);
++                line.write(buffer, 0, buffer.length);
+             }
+             bufferIndex = 0;
+         }
