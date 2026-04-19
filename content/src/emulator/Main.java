@@ -19,7 +19,26 @@ public class Main {
 		rom[0x0105]=0x00;
 		*/
 
-		String romPath = args.length > 0 ? String.join(" ", args) : "romTest/tetris.gb";
+		String romPath;
+		if (args.length > 0) {
+			romPath = String.join(" ", args);
+		} else {
+			try {
+				javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+			fileChooser.setDialogTitle("Select Game Boy ROM");
+			fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Game Boy ROMs", "gb", "gbc"));
+			int result = fileChooser.showOpenDialog(null);
+			if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+				romPath = fileChooser.getSelectedFile().getAbsolutePath();
+			} else {
+				System.exit(0);
+				return;
+			}
+		}
 
 		java.io.File file = new java.io.File(romPath);
 		if (!file.exists() && new java.io.File("content/" + romPath).exists()) {

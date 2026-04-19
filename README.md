@@ -1,4 +1,4 @@
-# My GameBoy Emulator
+# jboy
 
 [Español](#español) | [English](#english)
 
@@ -8,7 +8,7 @@
 
 ## Introduction
 
-Welcome to **My-GameBoy-Emulator**! This is a custom-built GameBoy emulator written entirely in Java. It accurately emulates the core hardware of the original Nintendo GameBoy, allowing you to play classic titles right on your computer.
+Welcome to **jboy**! This is a custom-built GameBoy emulator written entirely in Java. It accurately emulates the core hardware of the original Nintendo GameBoy, allowing you to play classic titles right on your computer.
 
 ## Features
 
@@ -27,7 +27,7 @@ Running the emulator is simple! You just need to have Java installed on your com
 
 ### Running the Emulator
 1. Download the latest release `.jar` file or compile the project from source.
-2. Launch it: `java -jar My-GameBoy-Emulator.jar`
+2. Launch it: `java -jar jboy.jar`
 3. Load a valid GameBoy ROM file (`.gb`).
 
 *Note: This repository includes some ROMs used for testing the emulator's functionality. However, for legal reasons, official commercial game ROMs are not included.*
@@ -54,7 +54,7 @@ Running the emulator is simple! You just need to have Java installed on your com
 
 ## Introducción
 
-¡Bienvenido a **My-GameBoy-Emulator**! Este es un emulador de GameBoy desarrollado totalmente en Java. Emula con precisión el hardware original de la Nintendo GameBoy, permitiéndote jugar títulos clásicos en tu computadora.
+¡Bienvenido a **jboy**! Este es un emulador de GameBoy desarrollado totalmente en Java. Emula con precisión el hardware original de la Nintendo GameBoy, permitiéndote jugar títulos clásicos en tu computadora.
 
 ## Características
 
@@ -73,7 +73,7 @@ Running the emulator is simple! You just need to have Java installed on your com
 
 ### Cómo ejecutar el emulador
 1. Descarga el archivo `.jar` o compila el proyecto desde el código fuente.
-2. Ejecútalo: `java -jar My-GameBoy-Emulator.jar`
+2. Ejecútalo: `java -jar jboy.jar`
 3. Carga un archivo ROM de GameBoy válido (`.gb`).
 
 *Nota: Este repositorio incluye algunas ROMs utilizadas para comprobar las funcionalidades del emulador. Sin embargo, por motivos legales, no se incluyen ROMs de juegos oficiales.*
