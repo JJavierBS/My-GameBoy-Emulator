@@ -6,34 +6,22 @@ public class InterruptionManager {
 	private final int[] INTERRUPTIONS = {1,2,4,8,16};
 	private final int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
 
-
-
-
-
-
 	private boolean IME;
 	private final Mmu mmu;
-	
-	
+
 	public InterruptionManager(Mmu mmu) {
 		super();
 		this.mmu = mmu;
 		IME=false;
 	}
-	
-
 
 	public void requestInterrupt(int type) {
 		setIF(getIF() | INTERRUPTIONS[type]);
 	}
-	
-	
 
 	public void setIME(boolean value) {
 		IME=value;
 	}
-	
-
 
 	public boolean handleInterrupt(Cpu cpu) {
 		int interruptions = getIF() & getIE();
@@ -84,9 +72,5 @@ public class InterruptionManager {
 	public boolean isIME() {
 		return IME;
 	}
-	
-	
-	
-	
-	
+
 }

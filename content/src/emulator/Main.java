@@ -3,24 +3,24 @@ package emulator;
 public class Main {
 
 	public static void main(String[] args) {
-		
+
 		Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
 	        System.err.println("Uncaught exception in thread " + t);
 	        e.printStackTrace();
 	    });
-		
-		/* 
+
+		/*
 		byte[] rom = new byte[0xFFFF];
-		rom[0x0100]=(byte)0x06;
-		rom[0x0101]=(byte)0x00;
-		rom[0x0102]=(byte)0x04;
-		rom[0x0103]=(byte)0xC3;
+		rom[0x0100]=(byte)0x06;	//LD B d8
+		rom[0x0101]=(byte)0x00;	//0
+		rom[0x0102]=(byte)0x04;	//inc B
+		rom[0x0103]=(byte)0xC3;	//jp a16
 		rom[0x0104]=0x02;
 		rom[0x0105]=0x00;
 		*/
-		
+
 		String romPath = args.length > 0 ? String.join(" ", args) : "romTest/tetris.gb";
-		
+
 		java.io.File file = new java.io.File(romPath);
 		if (!file.exists() && new java.io.File("content/" + romPath).exists()) {
 			romPath = "content/" + romPath;
@@ -28,8 +28,7 @@ public class Main {
 
 		Emulator emulator = new Emulator(romPath);
 		emulator.run();
-		
-		
+
 	}
 
 }

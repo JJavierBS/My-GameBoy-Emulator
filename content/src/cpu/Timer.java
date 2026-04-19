@@ -11,11 +11,6 @@ public class Timer {
 	private boolean TIMAOverflow;
 	private int TIMADelayCounter=0;
 
-
-
-
-
-	
 	public Timer(InterruptionManager interruptionManager, Mmu mmu) {
 		super();
 		divCont=0;
@@ -24,15 +19,13 @@ public class Timer {
 		this.mmu=mmu;
 		this.inicializateRegisters();
 	}
-	
-	
+
 	public void resetInternalCounters() {
 		divCont = 0;
 		timerCont = 0;
 		TIMAOverflow = false;
 		TIMADelayCounter = 0;
 	}
-	
 
 	public void step(int cycles) {
 
@@ -41,10 +34,10 @@ public class Timer {
 			divCont-=256;
 			setDIV((getDIV()+1)&0xFF);
 		}
-		
+
 		if((getTAC()&0X04)!=0) {
 
-			int period = PERIODS[getTAC() & 0x03]; 
+			int period = PERIODS[getTAC() & 0x03];
 			timerCont+=cycles;
 
 			while(timerCont>=period) {
@@ -55,8 +48,8 @@ public class Timer {
 						TIMADelayCounter = 0;
 						setTIMA(0x00);
 					}
-				} 
-				else { 
+				}
+				else {
 					setTIMA((getTIMA()+1)&0xFF);
 				}
 			}
@@ -64,7 +57,7 @@ public class Timer {
 			TIMAOverflow = false;
 			TIMADelayCounter = 0;
 		}
-		
+
 		if (TIMAOverflow) {
 			TIMADelayCounter += cycles;
 			if (TIMADelayCounter >= 4) {
@@ -108,12 +101,11 @@ public class Timer {
 		mmu.writeByte(0xFF07, value);
 	}
 
-	
 	private void inicializateRegisters(){
 		mmu.writeByte(0xFF04, 0x00);
 		mmu.writeByte(0xFF05, 0x00);
 		mmu.writeByte(0xFF06, 0x00);
 		mmu.writeByte(0xFF07, 0x05);
 	}
-	
+
 }

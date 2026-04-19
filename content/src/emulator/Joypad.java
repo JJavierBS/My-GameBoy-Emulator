@@ -14,7 +14,7 @@ public class Joypad implements KeyListener {
     private int directionButtons = 0x0F;
     private int selection = 0x30;
     private final InterruptionManager iM;
-    
+
     public int keyUp = KeyEvent.VK_UP;
     public int keyDown = KeyEvent.VK_DOWN;
     public int keyLeft = KeyEvent.VK_LEFT;
@@ -23,14 +23,14 @@ public class Joypad implements KeyListener {
     public int keyB = KeyEvent.VK_X;
     public int keySelect = KeyEvent.VK_SHIFT;
     public int keyStart = KeyEvent.VK_ENTER;
-    
+
     private final String configPath = "settings.properties";
 
     public Joypad(InterruptionManager iM) {
         this.iM = iM;
         loadConfig();
     }
-    
+
     public void loadConfig() {
         File file = new File(configPath);
         if (file.exists()) {
@@ -48,7 +48,7 @@ public class Joypad implements KeyListener {
             } catch (Exception e) {}
         }
     }
-    
+
     public void saveConfig() {
         Properties props = new Properties();
         props.setProperty("keyUp", String.valueOf(keyUp));
@@ -59,7 +59,7 @@ public class Joypad implements KeyListener {
         props.setProperty("keyB", String.valueOf(keyB));
         props.setProperty("keySelect", String.valueOf(keySelect));
         props.setProperty("keyStart", String.valueOf(keyStart));
-        
+
         try (FileOutputStream fos = new FileOutputStream(configPath)) {
             props.store(fos, "Game Boy Emulator Controls");
         } catch (IOException e) {}

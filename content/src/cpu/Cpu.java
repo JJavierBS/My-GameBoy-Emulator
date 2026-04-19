@@ -4,17 +4,17 @@ import memory.Mmu;
 public class Cpu {
 	private int cont = 0;
 	private int a, f, b, c, d, e, h, l;
-		
+
 	private int sp, pc;
-	
+
 	private final Mmu mmu;
-	
+
 	private final Timer timer;
 
 	private final InterruptionManager iM;
-	
+
 	private boolean halted, stop, pendingIME, haltBug;
-	
+
 	public Cpu(Mmu mmu, Timer timer, InterruptionManager iM) {
 		super();
 		this.mmu = mmu;
@@ -25,9 +25,7 @@ public class Cpu {
 		pendingIME=false;
 		haltBug=false;
 	}
-	
 
-	
 	public int getA() {
 		return a&0xFF;
 	}
@@ -51,12 +49,12 @@ public class Cpu {
 	public void setB(int b) {
 		this.b = b & 0xFF;
 	}
-	
+
 	public void setAF(int word) {
 		this.a = (word>>8) & 0xFF;
 		this.f = word & 0xF0;
 	}
-	
+
 	public int getAF() {
 		return ((a<<8) | f) & 0xFFFF;
 	}
@@ -68,11 +66,11 @@ public class Cpu {
 	public void setC(int c) {
 		this.c = c & 0xFF;
 	}
-	
+
 	public int getBC() {
 		return ((b<<8) | c) & 0xFFFF;
 	}
-	
+
 	public void setBC(int word) {
 		this.b = word>>8 & 0xFF;
 		this.c = word & 0xFF;
@@ -93,11 +91,11 @@ public class Cpu {
 	public void setE(int e) {
 		this.e = e & 0xFF;
 	}
-	
+
 	public int getDE() {
 		return ((d<<8) | e) & 0xFFFF;
 	}
-	
+
 	public void setDE(int word) {
 		this.d = word>>8 & 0xFF;
 		this.e = word & 0xFF;
@@ -122,7 +120,7 @@ public class Cpu {
 	public int getHL() {
 		return (((h & 0Xff)<<8) | (l & 0xFF));
 	}
-	
+
 	public void setHL(int word) {
 		this.h = word>>8 & 0xFF;
 		this.l = word & 0xFF;
@@ -143,7 +141,7 @@ public class Cpu {
 	public void setPc(int pc) {
 		this.pc = pc & 0xFFFF;
 	}
-	
+
 	public Mmu getMmu() {
 		return this.mmu;
 	}
@@ -155,11 +153,11 @@ public class Cpu {
 	public InterruptionManager getInterruptionManager() {
 		return this.iM;
 	}
-	
+
 	public void setHalted(boolean value) {
 		this.halted=value;
 	}
-	
+
 	public boolean isHalted() {
 		return this.halted;
 	}
@@ -172,7 +170,7 @@ public class Cpu {
 		return this.stop;
 	}
 
-	public void setPendingIME(boolean value) { 
+	public void setPendingIME(boolean value) {
 		this.pendingIME=value;
 	}
 
@@ -192,8 +190,6 @@ public class Cpu {
 		this.haltBug = haltBug;
 	}
 
-	
-	
 	private int extraGpuCycles = 0;
 
 	public void stepHardware(int cycles) {
@@ -211,90 +207,79 @@ public class Cpu {
 		if(value) f = f | 0x80;
 		else f = f & ~0x80;
 	}
-	
+
 	public boolean isZeroFlag() {
 		return (f & 0x80)!=0;
 	}
-	
+
 	public void updateSubstractFlag(boolean value) {
 		if(value) f = f | 0x40;
 		else f = f & ~0x40;
 	}
-	
+
 	public boolean isSubstractFlag() {
 		return (f & 0x40)!=0;
 	}
-	
+
 	public void updateHalfCarryFlag(boolean value) {
 		if(value) f = f | 0x20;
 		else f = f & ~0x20;
 	}
-	
+
 	public boolean isHalfCarryFlag() {
 		return (f & 0x20)!=0;
 	}
-	
+
 	public void updateCarryFlag(boolean value) {
 		if(value) f = f | 0x10;
 		else f = f & ~0x10;
 	}
-	
+
 	public boolean isCarryFlag() {
 		return (f & 0x10)!=0;
 	}
-	
-	
-	
-	
-	
+
 	public byte fetchByte() {
 		byte value = (byte)(mmu.readByte(pc) & 0xFF);
 		pc++;
 		pc &= 0xFFFF;
 		return value;
 	}
-	
+
 	public int fetchWord() {
 		int value = mmu.readWord(pc);
 		pc = (pc + 2) & 0xFFFF;
 		return value;
 	}
-	
-	
-	
+
 	public void pushByte(int value) {
 		sp--;
 		mmu.writeByte(sp,(byte)(value & 0xFF));
-		if(sp>0xFFFE || sp<0x8000) {
-
-		}
+		
 	}
-	
+
 	public void pushWord(int value) {
 		this.pushByte((value >> 8) & 0xFF);
-		this.pushByte(value & 0xFF);       
+		this.pushByte(value & 0xFF);
 	}
-	
+
 	public byte popByte() {
 		byte value = mmu.readByte(sp);
 		sp++;
-		if(sp>0xFFFE){
-
-		}
+		
 		return value;
 	}
-	
+
 	public int popWord() {
 		int lowByte = this.popByte() & 0xFF;
 		int highByte = this.popByte() & 0xFF;
 		return (highByte << 8) | lowByte;
 	}
-	
+
 	public void pushPC() {
 		this.pushWord(this.pc);
 	}
-	
-	
+
 	public int execute(InstructionSet ins) {
 		cont++;
 		if(this.stop || this.halted) return 0;
@@ -315,7 +300,6 @@ public class Cpu {
 
 		return cycles;
 	}
-	
 
 	public void inicializateRegisters() {
 		this.setA(0x01);
@@ -326,7 +310,7 @@ public class Cpu {
 		this.setE(0xD8);
 		this.setH(0x01);
 		this.setL(0x4D);
-		this.setSp(0xFFFE); 
+		this.setSp(0xFFFE);
 		this.setPc(0x0100);
  		mmu.writeByte(0xFF40, 0x91);
 		mmu.writeByte(0xFF42, 0x00);
@@ -339,13 +323,12 @@ public class Cpu {
 		mmu.writeByte(0xFF4B, 0x00);
 		mmu.writeByte(0xFFFF, 0x00);
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		return "A:" + String.format("%02X", a&0xFF) + " F:" + String.format("%02X", f) + " B:" + String.format("%02X", b & 0xFF) + " C:" + String.format("%02X", c&0xFF) +
 				" D:" + String.format("%02X", d) + " E:" + String.format("%02X", e) + " H:" + String.format("%02X", h) + " L:" + String.format("%02X", l) +
 				" SP:" + String.format("%04X", sp) + " PC:" + String.format("%04X", pc) + " PCMEM:" + String.format("%02X", mmu.readByte(pc)) + "," + String.format("%02X", mmu.readByte(pc+1)) + "," + String.format("%02X", mmu.readByte(pc+2)) + "," + String.format("%02X", mmu.readByte(pc+3));
 	}
-	
+
 }
