@@ -322,7 +322,7 @@ public class Cpu {
 	
 	//Funciones independientes
 	
-	private String[] trace = new String[20];
+	private String[] trace = new String[20000];
 	private int traceIndex = 0;
 
 	private int oobCount = 0;
@@ -333,8 +333,6 @@ public class Cpu {
 		//log
 		if(pc == 0x0286 && !printed0286) {
 			printed0286 = true;
-		}
-		if(cont%100000==0) {
 		}
 		cont++;
 		log = this.toString();
@@ -350,20 +348,26 @@ public class Cpu {
 			haltBug=false;
 		}
 		Instruction instruction = ins.get(op);
-		trace[traceIndex] = String.format("PC: %04X, Opcode: %02X", pc - 1, op);
-		traceIndex = (traceIndex + 1) % trace.length;
 		if((pc>=0x8000 && pc<0xA000) || (pc>=0xC000 && pc<0xC000) || (pc>0xDFFF && pc<0xFF80)) {
 			oobCount++;
 			if (oobCount == 1) {
 				for (int i = 0; i < trace.length; i++) {
 					int idx = (traceIndex + i) % trace.length;
 					if (trace[idx] != null) {
+						System.out.println(trace[idx]);
 					}
 				}
 				System.exit(1);
 			}
 		}
 		if(instruction==null) {
+			System.out.println("Unknown instruction " + String.format("%02X", op) + " at " + String.format("%04X", pc - 1));
+			for (int i = 0; i < trace.length; i++) {
+				int idx = (traceIndex + i) % trace.length;
+				if (trace[idx] != null) {
+					System.out.println(trace[idx]);
+				}
+			}
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);

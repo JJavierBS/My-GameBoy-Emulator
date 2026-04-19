@@ -2149,6 +2149,7 @@ public class InstructionSet {
 		instructions.put((byte)0xD9, cpu -> {
 			//RETI
 			cpu.setPc(cpu.popWord());
+			cpu.getInterruptionManager().setIME(true);
 			return 16;
 		});
 
@@ -2383,6 +2384,7 @@ public class InstructionSet {
 
 		instructions.put((byte)0xFB, cpu -> {
 			//EI
+			cpu.setPendingIME(true);
 			return 4;
 		});
 		
