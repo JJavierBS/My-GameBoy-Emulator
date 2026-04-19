@@ -7,7 +7,7 @@ import memory.Mmu;
 
 public class GpuDebugger extends JPanel {
     private static final int TILE_SIZE = 8;
-    private static final int TILE_SCALE = 2; // Ampliamos para verlo mejor
+    private static final int TILE_SCALE = 2;
     private static final int TILES_PER_ROW = 16;
 
     private final Mmu mmu;
@@ -23,7 +23,7 @@ public class GpuDebugger extends JPanel {
         frame.setSize(512, 512);
         frame.setVisible(false);
 
-        new Timer(500, e -> repaint()).start(); // Actualiza cada 500 ms
+        new Timer(500, e -> repaint()).start();
     }
 
     public JFrame getFrame() {
@@ -35,7 +35,7 @@ public class GpuDebugger extends JPanel {
         super.paintComponent(g);
 
         drawTileset(g, 0, 0);
-        drawTileMap(g, 0, 256); // debajo de los tiles
+        drawTileMap(g, 0, 256);
     }
 
     private void drawTileset(Graphics g, int offsetX, int offsetY) {
@@ -88,13 +88,13 @@ public class GpuDebugger extends JPanel {
     }
 
     private int mapColor(int color) {
-        // Paleta básica Game Boy (BG Palette por defecto)
+
         return switch (color) {
-            case 0 -> 0xFFFFFF; // blanco
-            case 1 -> 0xAAAAAA; // gris claro
-            case 2 -> 0x555555; // gris oscuro
-            case 3 -> 0x000000; // negro
-            default -> 0xFF00FF; // error
+            case 0 -> 0xFFFFFF;
+            case 1 -> 0xAAAAAA;
+            case 2 -> 0x555555;
+            case 3 -> 0x000000;
+            default -> 0xFF00FF;
         };
     }
 }

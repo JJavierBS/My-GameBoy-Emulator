@@ -37,7 +37,7 @@ public class Mmu {
 	
 	public Mmu() {
 		super();
-		this.memory = new byte[0x10000]; //64KB
+		this.memory = new byte[0x10000];
 	}
 	
 	
@@ -131,7 +131,7 @@ public class Mmu {
 					if (!romBankingMode) {
 						ramBank = value & 0x03;
 						if (isMBC3 && value >= 0x08 && value <= 0x0C) {
-							// RTC registers (unimplemented, but allowed)
+
 							ramBank = value;
 						}
 					} else {
@@ -148,7 +148,7 @@ public class Mmu {
 					}
 				}
 			}
-			return; // ROM is read-only
+			return;
 		}
 		if (addr == 0xFF04) {
 			value = 0;
@@ -214,7 +214,7 @@ public class Mmu {
 		try (FileInputStream fis = new FileInputStream(romFile)) {
 			romData = fis.readAllBytes();
 			
-			// Load only up to 32KB into memory array to not overwrite VRAM etc
+
 			int limit = Math.min(romData.length, 0x8000);
 			for (int i = 0; i < limit; i++) {
 				memory[i] = romData[i];
@@ -222,31 +222,31 @@ public class Mmu {
 			
 			if (romData.length > 0x147) {
 				int cartType = romData[0x147] & 0xFF;
-				// MBC1
+
 				if (cartType >= 1 && cartType <= 3) {
 					isMBC1 = true;
 					isMBC = true;
 				}
-				// MBC3
+
 				if (cartType >= 0x0F && cartType <= 0x13) {
 					isMBC3 = true;
 					isMBC = true;
 				}
-				// MBC5
+
 				if (cartType >= 0x19 && cartType <= 0x1E) {
 					isMBC5 = true;
 					isMBC = true;
 				}
 				if (isMBC) {
 					int ramSizeCode = romData[0x149] & 0xFF;
-					int ramSize = 0x8000; // default 32KB
+					int ramSize = 0x8000;
 					switch (ramSizeCode) {
 						case 0: ramSize = 0; break;
-						case 1: ramSize = 2048; break; // 2KB
-						case 2: ramSize = 8192; break; // 8KB
-						case 3: ramSize = 32768; break; // 32KB
-						case 4: ramSize = 131072; break; // 128KB
-						case 5: ramSize = 65536; break; // 64KB
+						case 1: ramSize = 2048; break;
+						case 2: ramSize = 8192; break;
+						case 3: ramSize = 32768; break;
+						case 4: ramSize = 131072; break;
+						case 5: ramSize = 65536; break;
 					}
 					if (ramSize > 0) {
 						ramData = new byte[ramSize];

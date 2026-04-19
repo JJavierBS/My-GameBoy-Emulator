@@ -37,11 +37,11 @@ public class InterruptionManager {
 
 	public boolean handleInterrupt(Cpu cpu) {
 		int interruptions = getIF() & getIE();
-		// Si hay interrupción pendiente y la CPU está en HALT, salir de HALT aunque IME=0
+
 		if(interruptions != 0 && cpu.isHalted()) {
 			cpu.setHalted(false);
 		}
-		//Lo mismo con stop
+
 		if(interruptions!=0 && cpu.isStop()) {
 			cpu.setStop(false);
 		}
@@ -52,7 +52,7 @@ public class InterruptionManager {
 		for(int i=0; i<5; i++) {
 			int flag = INTERRUPTIONS[i];
 			if((interruptions & flag)!=0) {
-				//Quitamos esta interrupción pendiente
+
 				setIF((getIF() & ~flag) & 0xFF);
 				IME=false;
 				cpu.pushPC();

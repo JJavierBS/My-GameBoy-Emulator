@@ -209,7 +209,7 @@ public class InstructionSet {
     		int result = ((a << 1) | carry) & 0xFF;
     		cpu.setA(result);
 
-    		cpu.updateZeroFlag(false); // Siempre 0
+    		cpu.updateZeroFlag(false);
    			cpu.updateSubstractFlag(false);
     		cpu.updateHalfCarryFlag(false);
     		cpu.updateCarryFlag(bit7 == 1);
@@ -291,7 +291,7 @@ public class InstructionSet {
 		});
 		
 		instructions.put((byte)0x20, cpu -> {
-			int despl = (byte)cpu.fetchByte(); //importante hace el casting a byte para que sea con símbolo!!!
+			int despl = (byte)cpu.fetchByte();
 			if(cpu.isZeroFlag()) return 8;
 			cpu.setPc(cpu.getPc()+despl);
 			return 12;
@@ -2082,7 +2082,7 @@ public class InstructionSet {
 			int value = cpu.popWord();
 
     		cpu.setA((value >> 8) & 0xFF);
-    		cpu.setF(value & 0xF0); // solo los 4 bits superiores son válidos
+    		cpu.setF(value & 0xF0);
 
     		return 12;
 		});
@@ -2123,8 +2123,8 @@ public class InstructionSet {
 		instructions.put((byte)0xF8, cpu -> {
 			
 			int sp = cpu.getSp();
-			byte offsetByte = (byte) cpu.fetchByte(); // signed
-			int offset = offsetByte; // signed extension
+			byte offsetByte = (byte) cpu.fetchByte();
+			int offset = offsetByte;
 			int result = sp + offset;
 
 			cpu.updateZeroFlag(false);

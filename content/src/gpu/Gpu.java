@@ -15,7 +15,7 @@ public class Gpu {
 	private GpuDisplay display;
 	
 	private int mode;
-	private int modeClock;	//va a contar los ciclos del modo LCD actual
+	private int modeClock;
 	
 
 	private final int[][] frameBuffer;
@@ -74,7 +74,7 @@ public class Gpu {
 				modeClock-=80;
 				mode=3;
 			}
-			// STAT interrupt: modo 2
+
 			if((stat & 0x20) != 0) iM.requestInterrupt(1);
 			break;
 		case 3:
@@ -92,15 +92,15 @@ public class Gpu {
 				int ln = mmu.readByte(0xFF44) & 0xFF;
 				ln++;
 				mmu.writeByte(0XFF44, ln);
-				// STAT interrupt: modo 0
+
 				if((stat & 0x08) != 0) iM.requestInterrupt(1);
-				// STAT interrupt: LY==LYC
+
 				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(ln>=144) {
 					mode=1;
 					iM.requestInterrupt(0);
 					if (display != null) display.vBlankOccurred();
-					// Reset window line counter
+
 					windowLineCounter = 0;
 				}
 				else {
@@ -114,9 +114,9 @@ public class Gpu {
 				int ln = mmu.readByte(0xFF44) & 0xFF;
 				ln++;
 				mmu.writeByte(0xFF44, ln & 0xFF);
-				// STAT interrupt: modo 1
+
 				if((stat & 0x10) != 0) iM.requestInterrupt(1);
-				// STAT interrupt: LY==LYC
+
 				if(ln == (mmu.readByte(0xFF45) & 0xFF) && (stat & 0x40) != 0) iM.requestInterrupt(1);
 				if(ln>153) {
 					ln=0;
@@ -153,7 +153,7 @@ public class Gpu {
 		int tileDataBase = (lcdControl & 0x10)!=0 ? 0x8000 : 0x8800;
 		
 		for(int x = 0; x<160; x++) {
-			int rgb = mapColor(0, bgPalete); // Default to color 0
+			int rgb = mapColor(0, bgPalete);
 			int color = 0;
 			
 		if (bgAvailable) {
@@ -200,7 +200,7 @@ public class Gpu {
 	
 	private void drawSprites(int ln) {
 		int lcdControl = mmu.readByte(0xFF40);
-		if ((lcdControl & 0x02) == 0) return; // Sprites deshabilitados
+		if ((lcdControl & 0x02) == 0) return;
 		
 		int spriteHeight = ((lcdControl & 0x04) != 0) ? 16 : 8;
 		
@@ -213,7 +213,7 @@ public class Gpu {
 			if (lineSprites.size() == 10) break;
 		}
 		
-		// Sort highest priority first: smaller X, then smaller OAM index
+
 		lineSprites.sort((s1, s2) -> {
 			if (s1[2] != s2[2]) return Integer.compare(s1[2], s2[2]);
 			return Integer.compare(s1[0], s2[0]);
@@ -228,22 +228,22 @@ public class Gpu {
 			int attr = sprite[4];
 			
 			int row = ln - y;
-			if ((attr & 0x40) != 0) row = spriteHeight - 1 - row; // Y flip
+			if ((attr & 0x40) != 0) row = spriteHeight - 1 - row;
 			if (spriteHeight == 16) {
-			    tile &= 0xFE; // Ignora bit 0 en modo 8x16
+			    tile &= 0xFE;
 			}
 			int tileAddr = 0x8000 + tile * 16 + row * 2;
 			int low = mmu.readByte(tileAddr) & 0xFF;
 			int high = mmu.readByte(tileAddr + 1) & 0xFF;
 			
 			for (int col = 0; col < 8; col++) {
-				int bit = (attr & 0x20) != 0 ? col : 7 - col; // X flip
+				int bit = (attr & 0x20) != 0 ? col : 7 - col;
 				int colorId = ((high >> bit) & 1) << 1 | ((low >> bit) & 1);
-				if (colorId == 0) continue; // Transparente
+				if (colorId == 0) continue;
 				int px = x + col;
 				if (px < 0 || px >= WIDTH) continue;
 				
-				if (spriteDrawn[px]) continue; // Pixel already drawn by higher priority sprite
+				if (spriteDrawn[px]) continue;
 				spriteDrawn[px] = true;
 				
 				int palette = (attr & 0x10) != 0 ? mmu.readByte(0xFF49) : mmu.readByte(0xFF48);

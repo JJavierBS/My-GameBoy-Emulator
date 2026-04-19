@@ -265,21 +265,21 @@ public class Cpu {
 	public void pushByte(int value) {
 		sp--;
 		mmu.writeByte(sp,(byte)(value & 0xFF));
-		if(sp>0xFFFE || sp<0x8000) { // Gameboy allows stack in WRAM and sometimes HRAM
-			// Overflow check
+		if(sp>0xFFFE || sp<0x8000) {
+
 		}
 	}
 	
 	public void pushWord(int value) {
-		this.pushByte((value >> 8) & 0xFF); // high byte
-		this.pushByte(value & 0xFF);        // low byte
+		this.pushByte((value >> 8) & 0xFF);
+		this.pushByte(value & 0xFF);       
 	}
 	
 	public byte popByte() {
 		byte value = mmu.readByte(sp);
 		sp++;
 		if(sp>0xFFFE){
-			// Some games might use WRAM for stack and occasionally pop past it temporarily or simply start there. We only care if it goes past FFFE.
+
 		}
 		return value;
 	}

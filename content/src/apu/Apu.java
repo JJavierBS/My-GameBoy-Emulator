@@ -16,27 +16,27 @@ public class Apu {
     private static final float CYCLES_PER_SAMPLE_F = 4194304.0f / SAMPLE_RATE;
     
     private SourceDataLine line;
-    private byte[] buffer = new byte[1024]; // 256 stereo samples (reduces video stutter)
+    private byte[] buffer = new byte[1024];
     private int bufferIndex = 0;
     
-    // HPF state for DC offset removal
+
     private float hpLeft = 0;
     private float hpRight = 0;
     
-    // Memory registers
-    private int[] registers = new int[0x30]; // 0xFF10 - 0xFF3F
+
+    private int[] registers = new int[0x30];
     
-    // Channel 1 & 2 variables
+
     private int ch1Timer = 0;
     private int ch1DutyStep = 0;
     private int ch2Timer = 0;
     private int ch2DutyStep = 0;
     
     private static final int[][] DUTY_CYCLES = {
-        {0, 0, 0, 0, 0, 0, 0, 1}, // 12.5%
-        {1, 0, 0, 0, 0, 0, 0, 1}, // 25%
-        {1, 0, 0, 0, 0, 1, 1, 1}, // 50%
-        {0, 1, 1, 1, 1, 1, 1, 0}  // 75%
+        {0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 1, 1},
+        {0, 1, 1, 1, 1, 1, 1, 0} 
     };
 
     public Apu() {
@@ -79,7 +79,7 @@ public class Apu {
                 line.stop();
                 line.close();
             }
-            // 44100 Hz, 16-bit, 2 channels (stereo), signed, little-endian
+
             AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
             
@@ -143,12 +143,12 @@ public class Apu {
     public void writeRegister(int addr, int value) {
         int reg = addr - 0xFF10;
         registers[reg] = value;
-        // Handle trigger events
-        if (addr == 0xFF14 && (value & 0x80) != 0) { // Ch1 trigger
+
+        if (addr == 0xFF14 && (value & 0x80) != 0) {
             int freq = registers[0xFF13 - 0xFF10] | ((registers[0xFF14 - 0xFF10] & 0x07) << 8);
             ch1Timer = (2048 - freq) * 4;
         }
-        if (addr == 0xFF19 && (value & 0x80) != 0) { // Ch2 trigger
+        if (addr == 0xFF19 && (value & 0x80) != 0) {
             int freq = registers[0xFF18 - 0xFF10] | ((registers[0xFF19 - 0xFF10] & 0x07) << 8);
             ch2Timer = (2048 - freq) * 4;
         }
@@ -166,9 +166,9 @@ public class Apu {
         int leftFinal = 0;
         int rightFinal = 0;
 
-        // If sound is on (NR52 bit 7), process channels
+
         if ((registers[0xFF26 - 0xFF10] & 0x80) != 0) {
-            // Channel 1
+
             int freq1 = registers[0xFF13 - 0xFF10] | ((registers[0xFF14 - 0xFF10] & 0x07) << 8);
             ch1Timer -= CYCLES_PER_SAMPLE;
             while (ch1Timer <= 0) {
@@ -179,7 +179,7 @@ public class Apu {
             int ch1Vol = (registers[0xFF12 - 0xFF10] >> 4) & 0x0F;
             int sample1 = DUTY_CYCLES[ch1Duty][ch1DutyStep] * ch1Vol;
     
-            // Channel 2
+
             int freq2 = registers[0xFF18 - 0xFF10] | ((registers[0xFF19 - 0xFF10] & 0x07) << 8);
             ch2Timer -= CYCLES_PER_SAMPLE;
             while (ch2Timer <= 0) {
@@ -194,26 +194,26 @@ public class Apu {
             int rightOut = 0;
             
             int nr51 = registers[0xFF25 - 0xFF10];
-            // Ch1 routing
+
             if ((nr51 & 0x10) != 0) leftOut += sample1;
             if ((nr51 & 0x01) != 0) rightOut += sample1;
-            // Ch2 routing
+
             if ((nr51 & 0x20) != 0) leftOut += sample2;
             if ((nr51 & 0x02) != 0) rightOut += sample2;
             
-            // Master volume
+
             int nr50 = registers[0xFF24 - 0xFF10];
             int leftVol = ((nr50 >> 4) & 0x07) + 1;
             int rightVol = (nr50 & 0x07) + 1;
             
-            // Final mix: leftOut ranges from 0 to 30.
-            // Multiply by volume (max 8) -> 0 to 240.
-            // Scale to 16-bit: multiply by 80 to leave headroom.
+
+
+
             leftFinal = leftOut * leftVol * 80;
             rightFinal = rightOut * rightVol * 80;
         }
 
-        // DC Blocker (High-pass filter) to remove the DC offset dynamically
+
         hpLeft += (leftFinal - hpLeft) * 0.01f;
         hpRight += (rightFinal - hpRight) * 0.01f;
         
@@ -226,13 +226,13 @@ public class Apu {
     }
 
     private void pushSample(int left, int right) {
-        // Clamp to 16-bit range
+
         if (left < -32768) left = -32768;
         if (left > 32767) left = 32767;
         if (right < -32768) right = -32768;
         if (right > 32767) right = 32767;
         
-        // Little-endian 16-bit
+
         buffer[bufferIndex++] = (byte) (left & 0xFF);
         buffer[bufferIndex++] = (byte) ((left >> 8) & 0xFF);
         buffer[bufferIndex++] = (byte) (right & 0xFF);

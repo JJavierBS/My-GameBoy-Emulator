@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Joypad implements KeyListener {
-    private int actionButtons = 0x0F; // 1 = unpressed
-    private int directionButtons = 0x0F; // 1 = unpressed
-    private int selection = 0x30; // Bits 4 & 5
+    private int actionButtons = 0x0F;
+    private int directionButtons = 0x0F;
+    private int selection = 0x30;
     private final InterruptionManager iM;
     
     public int keyUp = KeyEvent.VK_UP;

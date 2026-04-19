@@ -35,7 +35,7 @@ public class Timer {
 	
 
 	public void step(int cycles) {
-		//DIV aumenta cada 256 ciclos
+
 		divCont+=cycles;
 		if(divCont>=256) {
 			divCont-=256;
@@ -43,10 +43,10 @@ public class Timer {
 		}
 		
 		if((getTAC()&0X04)!=0) {
-			//si el timer esta activado accedemos a la tabla de frecuencias para comprobar cual es la oportuna
+
 			int period = PERIODS[getTAC() & 0x03]; 
 			timerCont+=cycles;
-			//Ojo, puede que hayamos incrementado demasiados ciclos hasta el punto que haya que incrementar TIMA más de 1 vez, se soluciona con el siguiente while
+
 			while(timerCont>=period) {
 				timerCont-=period;
 				if((getTIMA()&0xFF) == 0xFF) {
