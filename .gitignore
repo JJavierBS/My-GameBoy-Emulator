@@ -1,2 +1,12 @@
 content/log.txt
 *.class
+# IDE and Editor files
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+bin/
+out/
+jboy.jar
