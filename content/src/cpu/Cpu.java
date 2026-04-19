@@ -291,7 +291,6 @@ public class Cpu {
 		sp--;
 		mmu.writeByte(sp,(byte)(value & 0xFF));
 		if(sp>0xFFFE || sp<0xC000) {
-			System.out.println("sp=" + sp);
 			throw new RuntimeException("Stack overflow");
 		}
 	}
@@ -306,7 +305,6 @@ public class Cpu {
 		byte value = mmu.readByte(sp);
 		sp++;
 		if(sp>0xFFFE || sp<0xC000){
-			System.out.println("sp=" + sp);
 			throw new RuntimeException("Stack underflow");
 		}
 		return value;
@@ -334,15 +332,12 @@ public class Cpu {
 	public int execute(InstructionSet ins) {
 		//log
 		if(pc == 0x0286 && !printed0286) {
-			System.out.println(String.format("DUMP 0286: %02X %02X %02X %02X %02X", mmu.readByte(0x0286)&0xFF, mmu.readByte(0x0287)&0xFF, mmu.readByte(0x0288)&0xFF, mmu.readByte(0x0289)&0xFF, mmu.readByte(0x028A)&0xFF));
 			printed0286 = true;
 		}
 		if(cont%100000==0) {
-			System.out.println(String.format("Inst count: %d - LATE PC: %04X LY: %d IE: %02X IF: %02X halted: %b", cont, pc, mmu.readByte(0xFF44)&0xFF, mmu.readByte(0xFFFF)&0xFF, mmu.readByte(0xFF0F)&0xFF, halted));
 		}
 		cont++;
 		log = this.toString();
-		//System.out.println(log);
 		//endlog
 		if(this.stop || this.halted) return 0;
 		byte op;
@@ -354,27 +349,21 @@ public class Cpu {
 			op=fetchByte();
 			haltBug=false;
 		}
-		//System.out.println("Opcode: " + Integer.toHexString(op) + " Integer -> " + op);
 		Instruction instruction = ins.get(op);
 		trace[traceIndex] = String.format("PC: %04X, Opcode: %02X", pc - 1, op);
 		traceIndex = (traceIndex + 1) % trace.length;
 		if((pc>=0x8000 && pc<0xA000) || (pc>=0xC000 && pc<0xC000) || (pc>0xDFFF && pc<0xFF80)) {
 			oobCount++;
 			if (oobCount == 1) {
-				System.out.println("FATAL: PC out of valid executable range! PC: " + String.format("%04X", pc));
-				System.out.println("Last 20 instructions:");
 				for (int i = 0; i < trace.length; i++) {
 					int idx = (traceIndex + i) % trace.length;
 					if (trace[idx] != null) {
-						System.out.println(trace[idx]);
 					}
 				}
 				System.exit(1);
 			}
 		}
 		if(instruction==null) {
-			System.out.println("Instruction is null on pc = " + (this.pc-1));
-			System.out.println("Operation code = " + Integer.toHexString(op) + " Integer -> " + op);
 			System.exit(1);
 		}
 		int cycles = instruction.execute(this);

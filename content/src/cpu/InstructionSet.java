@@ -2149,7 +2149,6 @@ public class InstructionSet {
 		instructions.put((byte)0xD9, cpu -> {
 			//RETI
 			cpu.setPc(cpu.popWord());
-			System.out.println("IME set to true at PC: " + cpu.getPc()); cpu.getInterruptionManager().setIME(true);
 			return 16;
 		});
 
@@ -2384,8 +2383,6 @@ public class InstructionSet {
 
 		instructions.put((byte)0xFB, cpu -> {
 			//EI
-			System.out.println("EI executed at PC: " + cpu.getPc()); System.out.println("EI executed at PC: " + cpu.getPc() + ", SP: " + cpu.getSp()); cpu.setPendingIME(true);
-			// System.out.println("Pending IME set to true");
 			return 4;
 		});
 		

@@ -24,7 +24,6 @@ public class InterruptionManager {
 	//Función que permite a otros módulos solicitar interrupciones
 	//Se comprueba después de la ejecución de cada instrucción**
 	public void requestInterrupt(int type) {
-		//System.out.println("Interrupción solicitada: " + type);
 		setIF(getIF() | INTERRUPTIONS[type]);
 	}
 	
@@ -49,7 +48,6 @@ public class InterruptionManager {
 		if(!IME) {
 			return false; // las interrupciones están desactivadas
 		}
-		//System.out.println("Handeling interrupt");
 		if(interruptions == 0) return false; // Comprobar si hay alguna interrupción posible a ejecutar
 		for(int i=0; i<5; i++) {
 			int flag = INTERRUPTIONS[i];
@@ -58,10 +56,8 @@ public class InterruptionManager {
 				setIF((getIF() & ~flag) & 0xFF);
 				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
 				cpu.pushPC();
-				//System.out.println("INT " + i + " sp: " + cpu.getSp());
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
-				// System.out.println("Interrupción manejada: " + i);
 				cpu.setHalted(false); //La cpu deja el modo suspensión
 				return true;
 			}

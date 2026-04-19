@@ -95,7 +95,6 @@ public class Mmu {
 			addr -= 0x2000; 
 		}
 		if (addr == 0xFF02 && value == 0x81) {
-			System.out.print((char)memory[0xFF01]);
 		}
 		memory[addr] = (byte)(value & 0xFF);
 	}

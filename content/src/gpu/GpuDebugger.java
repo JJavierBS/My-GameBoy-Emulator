@@ -11,18 +11,23 @@ public class GpuDebugger extends JPanel {
     private static final int TILES_PER_ROW = 16;
 
     private final Mmu mmu;
+    private final JFrame frame;
 
     public GpuDebugger(Mmu mmu) {
         this.mmu = mmu;
 
-        JFrame frame = new JFrame("GPU Debugger");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame = new JFrame("GPU Debugger");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setResizable(false);
         frame.add(this);
         frame.setSize(512, 512);
-        frame.setVisible(true);
+        frame.setVisible(false);
 
         new Timer(500, e -> repaint()).start(); // Actualiza cada 500 ms
+    }
+
+    public JFrame getFrame() {
+        return frame;
     }
 
     @Override
