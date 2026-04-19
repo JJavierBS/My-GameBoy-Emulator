@@ -3,18 +3,18 @@ package cpu;
 import memory.Mmu;
 
 public class Timer {
-	private final int[] PERIODS = {1024, 16, 64, 256}; //Tabla de frecuencias según TAC
+	private final int[] PERIODS = {1024, 16, 64, 256};
 	private int divCont;
 	private int timerCont;
 	private final InterruptionManager interruptionManager;
 	private final Mmu mmu;
 	private boolean TIMAOverflow;
 	private int TIMADelayCounter=0;
-	//Registros:
-	//DIV -> 0xFF04
-	//TIMA -> 0xFF05
-	//TMA -> 0xFF06
-	//TAC -> 0xFF07
+
+
+
+
+
 	
 	public Timer(InterruptionManager interruptionManager, Mmu mmu) {
 		super();
@@ -33,7 +33,7 @@ public class Timer {
 		TIMADelayCounter = 0;
 	}
 	
-	//Esta función es llamada en cada instrucción para simular los ciclos que tardaría
+
 	public void step(int cycles) {
 		//DIV aumenta cada 256 ciclos
 		divCont+=cycles;
@@ -51,8 +51,8 @@ public class Timer {
 				timerCont-=period;
 				if((getTIMA()&0xFF) == 0xFF) {
 					if(!TIMAOverflow) {
-						TIMAOverflow = true; //Se ha producido un overflow, se incrementará TIMA en el siguiente ciclo
-						TIMADelayCounter = 0; //Reiniciamos el contador de delay
+						TIMAOverflow = true;
+						TIMADelayCounter = 0;
 						setTIMA(0x00);
 					}
 				} 
@@ -110,10 +110,10 @@ public class Timer {
 
 	
 	private void inicializateRegisters(){
-		mmu.writeByte(0xFF04, 0x00); //DIV
-		mmu.writeByte(0xFF05, 0x00); //TIMA
-		mmu.writeByte(0xFF06, 0x00); //TMA
-		mmu.writeByte(0xFF07, 0x05); //TAC
+		mmu.writeByte(0xFF04, 0x00);
+		mmu.writeByte(0xFF05, 0x00);
+		mmu.writeByte(0xFF06, 0x00);
+		mmu.writeByte(0xFF07, 0x05);
 	}
 	
 }

@@ -5,13 +5,13 @@ import memory.Mmu;
 public class InterruptionManager {
 	private final int[] INTERRUPTIONS = {1,2,4,8,16};
 	private final int[] interruptionsAddr = {0x40,0x48,0x50,0x58,0x60};
-	//Indexación:
-	//0 -> Vblank
-	//1 -> LCD
-	//2 -> Timer
-	//3 -> Serial
-	//4 -> JoyPad
-	private boolean IME; //Permite o no las interrupciones en el sistema (Interrupt Master Enable)
+
+
+
+
+
+
+	private boolean IME;
 	private final Mmu mmu;
 	
 	
@@ -21,20 +21,20 @@ public class InterruptionManager {
 		IME=false;
 	}
 	
-	//Función que permite a otros módulos solicitar interrupciones
-	//Se comprueba después de la ejecución de cada instrucción**
+
+
 	public void requestInterrupt(int type) {
 		setIF(getIF() | INTERRUPTIONS[type]);
 	}
 	
 	
-	//Función para activar y desactivar interrupciones
+
 	public void setIME(boolean value) {
 		IME=value;
 	}
 	
-	//Función para realizar las interrupciones
-	//Es llamada después de cada instrucción del procesador
+
+
 	public boolean handleInterrupt(Cpu cpu) {
 		int interruptions = getIF() & getIE();
 		// Si hay interrupción pendiente y la CPU está en HALT, salir de HALT aunque IME=0
@@ -46,19 +46,19 @@ public class InterruptionManager {
 			cpu.setStop(false);
 		}
 		if(!IME) {
-			return false; // las interrupciones están desactivadas
+			return false;
 		}
-		if(interruptions == 0) return false; // Comprobar si hay alguna interrupción posible a ejecutar
+		if(interruptions == 0) return false;
 		for(int i=0; i<5; i++) {
 			int flag = INTERRUPTIONS[i];
-			if((interruptions & flag)!=0) { //Ejecutar ESA interrupción
+			if((interruptions & flag)!=0) {
 				//Quitamos esta interrupción pendiente
 				setIF((getIF() & ~flag) & 0xFF);
-				IME=false; //Deshabilitamos temporalemente el resto de interrupciones
+				IME=false;
 				cpu.pushPC();
 				cpu.setPc(interruptionsAddr[i]);
 				cpu.setStop(false);
-				cpu.setHalted(false); //La cpu deja el modo suspensión
+				cpu.setHalted(false);
 				return true;
 			}
 		}

@@ -4,8 +4,8 @@ import cpu.InterruptionManager;
 import memory.Mmu;
 
 
-//Esta clase se encarga de la lógica de la gpu, tiles, sprites, scroll...
-//Esta clase no imprime como tal la imagen, de ello se encarga GpuDisplay
+
+
 public class Gpu {
 	private static final int WIDTH = 160;
 	private static final int HEIGHT = 144;
@@ -14,10 +14,10 @@ public class Gpu {
 	private final Mmu mmu;
 	private GpuDisplay display;
 	
-	private int mode; //0-3, son los modos LCD
+	private int mode;
 	private int modeClock;	//va a contar los ciclos del modo LCD actual
 	
-	//Importante -> El buffer de dibujado
+
 	private final int[][] frameBuffer;
 	private final int[] bgPriority;
 	
@@ -38,25 +38,25 @@ public class Gpu {
 	}
 	
 	private void inicializateRegisters(){
-		mmu.writeByte(0xFF40, 0x91); //LCDC
-		mmu.writeByte(0xFF41, 0x85); //STAT
-		mmu.writeByte(0xFF42, 0x00); //SCY
-		mmu.writeByte(0xFF43, 0x00); //SCX
-		mmu.writeByte(0xFF44, 0x00); //LY -> línea actual
-		mmu.writeByte(0xFF45, 0x00); //LYC -> línea comparativa
-		mmu.writeByte(0xFF46, 0xFF); //DMA -> transferencia de sprites
-		mmu.writeByte(0xFF47, (byte) 0b11100100); //BG Palette (fondo)
-		mmu.writeByte(0xFF48, 0xFC); //OBP0 -> sprite palette 0
-		mmu.writeByte(0xFF49, 0xFC); //OBP1 -> sprite palette 1
-		mmu.writeByte(0xFF4A, 0x00); //WY -> y de la ventana
-		mmu.writeByte(0xFF4B, 0x00); //WX -> x de la ventana
+		mmu.writeByte(0xFF40, 0x91);
+		mmu.writeByte(0xFF41, 0x85);
+		mmu.writeByte(0xFF42, 0x00);
+		mmu.writeByte(0xFF43, 0x00);
+		mmu.writeByte(0xFF44, 0x00);
+		mmu.writeByte(0xFF45, 0x00);
+		mmu.writeByte(0xFF46, 0xFF);
+		mmu.writeByte(0xFF47, (byte) 0b11100100);
+		mmu.writeByte(0xFF48, 0xFC);
+		mmu.writeByte(0xFF49, 0xFC);
+		mmu.writeByte(0xFF4A, 0x00);
+		mmu.writeByte(0xFF4B, 0x00);
 	}
 
 	public void setDisplay(GpuDisplay display) {
 		this.display=display;
 	}
 	
-	//Método principal de la GPU
+
 	public void step(int cycles) {
  		boolean lcdAvailable = (mmu.readByte(0xFF40) & 0x80) != 0;
 		if(!lcdAvailable) {
@@ -68,8 +68,8 @@ public class Gpu {
 		modeClock+=cycles;
 		int stat = mmu.readByte(0xFF41) & 0xFF;
 		switch(mode) {
-		case 2: //OAM Scan -> Lee los sprites que hay que renderizar
-			//Dura 80 ciclos
+		case 2:
+
 			if(modeClock>=80) {
 				modeClock-=80;
 				mode=3;
@@ -77,16 +77,16 @@ public class Gpu {
 			// STAT interrupt: modo 2
 			if((stat & 0x20) != 0) iM.requestInterrupt(1);
 			break;
-		case 3: //VRAM read -> Lee los tiles y dibuja línea
-			//Dura 182 ciclos
+		case 3:
+
 			if(modeClock>=172) {
 				modeClock-=172;
 				mode=0;
 				drawLine();
 			}
 			break;
-		case 0: //HBlank -> Acaba de terminar de dibujar una línea, espera
-			//Dura 204 ciclos
+		case 0:
+
 			if(modeClock>=204) {
 				modeClock-=204;
 				int ln = mmu.readByte(0xFF44) & 0xFF;
@@ -108,7 +108,7 @@ public class Gpu {
 				}
 			}
 			break;
-		case 1: //VBlank -> Espera entre frames y debe lanzar una interrupción
+		case 1:
 			if(modeClock>=456) {
 				modeClock-=456;
 				int ln = mmu.readByte(0xFF44) & 0xFF;
@@ -261,15 +261,15 @@ public class Gpu {
 		int shade = (bgPalette >> (color * 2) & 0x03);
 		switch (shade){
 		case 0:
-			return 0xFFFFFFFF; //blanco
+			return 0xFFFFFFFF;
 		case 1:
-			return 0xFFAAAAAA; //gris claro
+			return 0xFFAAAAAA;
 		case 2:
-			return 0xFF555555; //gris oscuro
+			return 0xFF555555;
 		case 3:
-			return 0xFF000000; //negro
+			return 0xFF000000;
 		default:
-			return 0xFF00FF; //error
+			return 0xFF00FF;
 		}
 	}
 	
